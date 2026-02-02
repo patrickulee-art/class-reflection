@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>수업 성찰 일지 - English Teacher</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary: #4a90a4;
@@ -56,6 +58,7 @@
             margin-bottom: 24px;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
+            position: relative;
         }
 
         header h1 {
@@ -116,8 +119,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .card {
@@ -632,6 +642,74 @@
             margin-bottom: 16px;
         }
 
+        /* Sync & Settings Styles */
+        .header-actions {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(4px);
+        }
+
+        .btn-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            margin-top: 8px;
+            display: inline-flex;
+        }
+
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+        }
+
+        .sync-dot.online {
+            background: #4ade80;
+        }
+
+        .sync-dot.offline {
+            background: #f87171;
+        }
+
+        .settings-grid {
+            display: grid;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                position: relative;
+                padding-top: 60px;
+            }
+
+            .header-actions {
+                top: 10px;
+                right: 10px;
+            }
+        }
+
         .empty-state h3 {
             font-size: 1.1rem;
             font-weight: 600;
@@ -773,6 +851,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -1066,6 +1145,48 @@
         </div>
     </div>
 
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <h3>&#9881; 동기화 설정 (Supabase)</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px;">
+                컴퓨터와 휴대폰 간 데이터를 동기화하려면 Supabase 프로젝트 정보가 필요합니다.
+            </p>
+            <div class="settings-grid">
+                <div class="form-group">
+                    <label>Project URL</label>
+                    <input type="text" id="supabaseUrl" placeholder="https://your-project.supabase.co">
+                </div>
+                <div class="form-group">
+                    <label>Anon Public Key</label>
+                    <input type="text" id="supabaseKey" placeholder="your-anon-key">
+                </div>
+            </div>
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="closeSettings()">닫기</button>
+                <button class="btn btn-primary" onclick="saveSettings()">설정 저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal">
+            <h3 id="authModalTitle">&#128100; 로그인</h3>
+            <p id="authModalDesc" style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px;">
+                이메일로 로그인하여 동기화를 시작하세요.
+            </p>
+            <div class="form-group">
+                <label>이메일</label>
+                <input type="text" id="authEmail" placeholder="example@email.com">
+            </div>
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="closeAuth()">취소</button>
+                <button class="btn btn-primary" id="authSubmitBtn" onclick="handleAuthSubmit()">매직링크 전송</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div class="toast" id="toast">
         <span id="toastIcon"></span>
@@ -1075,15 +1196,31 @@
     <script>
         // LocalStorage key
         const STORAGE_KEY = 'classReflections';
+        const CONFIG_KEY = 'supabaseConfig';
         let deleteTargetId = null;
+        let supabaseClient = null;
+        let currentUser = null;
+
+        // Hardcoded Supabase Credentials
+        const SUPABASE_URL = 'https://ycsuirctttglapmbhqmd.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_1zSsgFyGynGiOpFad_jW0A_XPeSsWsH';
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             initializeDatetime();
             initializeSliders();
             initializeTabs();
+
+            // Priority: Hardcoded > LocalStorage
+            if (SUPABASE_URL && SUPABASE_KEY) {
+                initSupabase(SUPABASE_URL, SUPABASE_KEY);
+            } else {
+                await loadSupabaseConfig();
+            }
+
             loadHistory();
             updateStats();
+            checkSession();
         });
 
         // Set current datetime
@@ -1099,9 +1236,11 @@
             sliders.forEach(slider => {
                 const input = document.getElementById(slider);
                 const display = document.getElementById(`${slider}Value`);
-                input.addEventListener('input', () => {
-                    display.textContent = input.value;
-                });
+                if (input && display) {
+                    input.addEventListener('input', () => {
+                        display.textContent = input.value;
+                    });
+                }
             });
         }
 
@@ -1129,15 +1268,21 @@
             });
         }
 
-        // Get reflections from LocalStorage
+        // Get reflections (Local first)
         function getReflections() {
-            const data = localStorage.getItem(STORAGE_KEY);
-            return data ? JSON.parse(data) : [];
+            return getLocalReflections();
         }
 
-        // Save reflections to LocalStorage
-        function saveReflections(reflections) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(reflections));
+        // Save reflections (Local + Remote Sync)
+        async function saveReflections(reflections) {
+            saveLocalReflections(reflections);
+            if (supabaseClient && currentUser) {
+                try {
+                    await syncReflections();
+                } catch (e) {
+                    console.error('Save sync error:', e);
+                }
+            }
         }
 
         // Form submission
@@ -1165,10 +1310,13 @@
 
             const reflections = getReflections();
             reflections.unshift(reflection);
-            saveReflections(reflections);
 
-            showToast('success', '성찰 기록이 저장되었습니다!');
-            resetForm();
+            saveReflections(reflections).then(() => {
+                showToast('success', '성찰 기록이 저장되었습니다!');
+                resetForm();
+                loadHistory();
+                updateStats();
+            });
         });
 
         // Reset form
@@ -1176,8 +1324,10 @@
             document.getElementById('reflectionForm').reset();
             initializeDatetime();
             ['preparation', 'engagement', 'timeManagement', 'satisfaction', 'energy'].forEach(slider => {
-                document.getElementById(slider).value = 3;
-                document.getElementById(`${slider}Value`).textContent = '3';
+                const input = document.getElementById(slider);
+                const display = document.getElementById(`${slider}Value`);
+                if (input) input.value = 3;
+                if (display) display.textContent = '3';
             });
         }
 
@@ -1187,106 +1337,109 @@
             const historyList = document.getElementById('historyList');
             const historyCount = document.getElementById('historyCount');
 
-            historyCount.textContent = `총 ${reflections.length}개의 기록`;
+            if (historyCount) historyCount.textContent = `총 ${reflections.length}개의 기록`;
 
             if (reflections.length === 0) {
-                historyList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">&#128218;</div>
-                        <h3>아직 기록이 없습니다</h3>
-                        <p>첫 번째 수업 성찰을 작성해보세요!</p>
-                    </div>
-                `;
+                if (historyList) {
+                    historyList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="icon">&#128218;</div>
+                            <h3>아직 기록이 없습니다</h3>
+                            <p>첫 번째 수업 성찰을 작성해보세요!</p>
+                        </div>
+                    `;
+                }
                 return;
             }
 
-            historyList.innerHTML = reflections.map(r => {
-                const date = new Date(r.datetime);
-                const formattedDate = date.toLocaleDateString('ko-KR', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    weekday: 'short',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
+            if (historyList) {
+                historyList.innerHTML = reflections.map(r => {
+                    const date = new Date(r.datetime);
+                    const formattedDate = date.toLocaleDateString('ko-KR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        weekday: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
 
-                const avgScore = ((r.scores.preparation + r.scores.engagement + r.scores.timeManagement +
-                                   r.scores.satisfaction + r.scores.energy) / 5).toFixed(1);
-
-                return `
-                    <div class="history-item">
-                        <div class="history-header">
-                            <div class="history-meta">
-                                <span class="history-date">${formattedDate}</span>
-                                <span class="history-class">${escapeHtml(r.className)}</span>
-                                <span class="history-topic">${escapeHtml(r.topic)}</span>
+                    return `
+                        <div class="history-item">
+                            <div class="history-header">
+                                <div class="history-meta">
+                                    <span class="history-date">${formattedDate}</span>
+                                    <span class="history-class">${escapeHtml(r.className)}</span>
+                                    <span class="history-topic">${escapeHtml(r.topic)}</span>
+                                </div>
+                                <div class="history-scores">
+                                    <div class="score-badge">
+                                        <span class="score-badge-value">${r.scores.preparation}</span>
+                                        <span class="score-badge-label">준비</span>
+                                    </div>
+                                    <div class="score-badge">
+                                        <span class="score-badge-value">${r.scores.engagement}</span>
+                                        <span class="score-badge-label">참여</span>
+                                    </div>
+                                    <div class="score-badge">
+                                        <span class="score-badge-value">${r.scores.timeManagement}</span>
+                                        <span class="score-badge-label">시간</span>
+                                    </div>
+                                    <div class="score-badge">
+                                        <span class="score-badge-value">${r.scores.satisfaction}</span>
+                                        <span class="score-badge-label">만족</span>
+                                    </div>
+                                    <div class="score-badge">
+                                        <span class="score-badge-value">${r.scores.energy}</span>
+                                        <span class="score-badge-label">에너지</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="history-scores">
-                                <div class="score-badge">
-                                    <span class="score-badge-value">${r.scores.preparation}</span>
-                                    <span class="score-badge-label">준비</span>
+                            <div class="history-content">
+                                <div class="history-section">
+                                    <div class="history-section-title">&#128218; 수업 준비 과정</div>
+                                    <div class="history-section-content">${escapeHtml(r.preparationProcess) || '-'}</div>
                                 </div>
-                                <div class="score-badge">
-                                    <span class="score-badge-value">${r.scores.engagement}</span>
-                                    <span class="score-badge-label">참여</span>
+                                <div class="history-section">
+                                    <div class="history-section-title">&#128077; 잘한 점</div>
+                                    <div class="history-section-content">${escapeHtml(r.strengths) || '-'}</div>
                                 </div>
-                                <div class="score-badge">
-                                    <span class="score-badge-value">${r.scores.timeManagement}</span>
-                                    <span class="score-badge-label">시간</span>
+                                <div class="history-section">
+                                    <div class="history-section-title">&#128736; 개선할 점</div>
+                                    <div class="history-section-content">${escapeHtml(r.improvements) || '-'}</div>
                                 </div>
-                                <div class="score-badge">
-                                    <span class="score-badge-value">${r.scores.satisfaction}</span>
-                                    <span class="score-badge-label">만족</span>
+                                <div class="history-section">
+                                    <div class="history-section-title">&#127919; 다음 수업 적용</div>
+                                    <div class="history-section-content">${escapeHtml(r.actionItems) || '-'}</div>
                                 </div>
-                                <div class="score-badge">
-                                    <span class="score-badge-value">${r.scores.energy}</span>
-                                    <span class="score-badge-label">에너지</span>
-                                </div>
+                            </div>
+                            <div class="history-actions">
+                                <button class="btn btn-danger" onclick="openDeleteModal(${r.id})">
+                                    &#128465; 삭제
+                                </button>
                             </div>
                         </div>
-                        <div class="history-content">
-                            <div class="history-section">
-                                <div class="history-section-title">&#128218; 수업 준비 과정</div>
-                                <div class="history-section-content">${escapeHtml(r.preparationProcess) || '-'}</div>
-                            </div>
-                            <div class="history-section">
-                                <div class="history-section-title">&#128077; 잘한 점</div>
-                                <div class="history-section-content">${escapeHtml(r.strengths) || '-'}</div>
-                            </div>
-                            <div class="history-section">
-                                <div class="history-section-title">&#128736; 개선할 점</div>
-                                <div class="history-section-content">${escapeHtml(r.improvements) || '-'}</div>
-                            </div>
-                            <div class="history-section">
-                                <div class="history-section-title">&#127919; 다음 수업 적용</div>
-                                <div class="history-section-content">${escapeHtml(r.actionItems) || '-'}</div>
-                            </div>
-                        </div>
-                        <div class="history-actions">
-                            <button class="btn btn-danger" onclick="openDeleteModal(${r.id})">
-                                &#128465; 삭제
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+                    `;
+                }).join('');
+            }
         }
 
         // Update statistics
         function updateStats() {
             const reflections = getReflections();
-
-            // Total reflections
-            document.getElementById('totalReflections').textContent = reflections.length;
+            const totalRef = document.getElementById('totalReflections');
+            if (totalRef) totalRef.textContent = reflections.length;
 
             if (reflections.length === 0) {
-                document.getElementById('avgOverall').textContent = '-';
+                const overall = document.getElementById('avgOverall');
+                if (overall) overall.textContent = '-';
                 document.getElementById('thisMonth').textContent = '0';
                 document.getElementById('streak').textContent = '0';
                 ['Preparation', 'Engagement', 'TimeManagement', 'Satisfaction', 'Energy'].forEach(metric => {
-                    document.getElementById(`avg${metric}`).textContent = '-';
-                    document.getElementById(`avg${metric}Bar`).style.width = '0%';
+                    const el = document.getElementById(`avg${metric}`);
+                    const bar = document.getElementById(`avg${metric}Bar`);
+                    if (el) el.textContent = '-';
+                    if (bar) bar.style.width = '0%';
                 });
                 document.getElementById('trendChart').innerHTML = `
                     <div class="empty-state" style="width: 100%; padding: 40px 0;">
@@ -1323,9 +1476,10 @@
             };
 
             const overallAvg = ((parseFloat(avgs.preparation) + parseFloat(avgs.engagement) +
-                                parseFloat(avgs.timeManagement) + parseFloat(avgs.satisfaction) +
-                                parseFloat(avgs.energy)) / 5).toFixed(1);
-            document.getElementById('avgOverall').textContent = overallAvg;
+                parseFloat(avgs.timeManagement) + parseFloat(avgs.satisfaction) +
+                parseFloat(avgs.energy)) / 5).toFixed(1);
+            const overallEl = document.getElementById('avgOverall');
+            if (overallEl) overallEl.textContent = overallAvg;
 
             // Update bar charts
             const metricMap = {
@@ -1338,8 +1492,10 @@
 
             Object.keys(avgs).forEach(key => {
                 const metricName = metricMap[key];
-                document.getElementById(`avg${metricName}`).textContent = avgs[key];
-                document.getElementById(`avg${metricName}Bar`).style.width = `${(avgs[key] / 5) * 100}%`;
+                const el = document.getElementById(`avg${metricName}`);
+                const bar = document.getElementById(`avg${metricName}Bar`);
+                if (el) el.textContent = avgs[key];
+                if (bar) bar.style.width = `${(avgs[key] / 5) * 100}%`;
             });
 
             // This month count
@@ -1392,6 +1548,7 @@
         // Update trend chart
         function updateTrendChart(data) {
             const trendChart = document.getElementById('trendChart');
+            if (!trendChart) return;
 
             if (data.length === 0) {
                 trendChart.innerHTML = `
@@ -1403,9 +1560,9 @@
             }
 
             const maxScore = 5;
-            trendChart.innerHTML = data.map((r, index) => {
+            trendChart.innerHTML = data.map((r) => {
                 const avg = ((r.scores.preparation + r.scores.engagement + r.scores.timeManagement +
-                             r.scores.satisfaction + r.scores.energy) / 5);
+                    r.scores.satisfaction + r.scores.energy) / 5);
                 const height = (avg / maxScore) * 100;
                 const date = new Date(r.datetime);
                 const label = `${date.getMonth() + 1}/${date.getDate()}`;
@@ -1445,23 +1602,39 @@
         // Delete modal
         function openDeleteModal(id) {
             deleteTargetId = id;
-            document.getElementById('deleteModal').classList.add('show');
+            const modal = document.getElementById('deleteModal');
+            if (modal) modal.classList.add('show');
         }
 
         function closeDeleteModal() {
             deleteTargetId = null;
-            document.getElementById('deleteModal').classList.remove('show');
+            const modal = document.getElementById('deleteModal');
+            if (modal) modal.classList.remove('show');
         }
 
-        function confirmDelete() {
+        async function confirmDelete() {
             if (deleteTargetId === null) return;
 
-            let reflections = getReflections();
+            let reflections = getLocalReflections();
             reflections = reflections.filter(r => r.id !== deleteTargetId);
-            saveReflections(reflections);
+
+            // Delete from remote if exists
+            if (supabaseClient && currentUser) {
+                try {
+                    await supabaseClient.from('reflections').delete().match({
+                        user_id: currentUser.id,
+                        id: deleteTargetId
+                    });
+                } catch (e) {
+                    console.error('Remote delete error:', e);
+                }
+            }
+
+            await saveReflections(reflections);
 
             closeDeleteModal();
             loadHistory();
+            updateStats();
             showToast('success', '기록이 삭제되었습니다.');
         }
 
@@ -1470,32 +1643,213 @@
             const toast = document.getElementById('toast');
             const toastIcon = document.getElementById('toastIcon');
             const toastMessage = document.getElementById('toastMessage');
+            if (toast && toastIcon && toastMessage) {
+                toast.className = `toast ${type}`;
+                toastIcon.innerHTML = type === 'success' ? '&#10004;' : '&#10006;';
+                toastMessage.textContent = message;
 
-            toast.className = `toast ${type}`;
-            toastIcon.innerHTML = type === 'success' ? '&#10004;' : '&#10006;';
-            toastMessage.textContent = message;
+                toast.classList.add('show');
 
-            toast.classList.add('show');
-
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-        // Escape HTML
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // Close modal on outside click
-        document.getElementById('deleteModal').addEventListener('click', (e) => {
-            if (e.target.id === 'deleteModal') {
-                closeDeleteModal();
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
             }
-        });
+        }
+
+        // --- Supabase & Sync Logic ---
+
+        async function loadSupabaseConfig() {
+            const config = localStorage.getItem(CONFIG_KEY);
+            if (config) {
+                const { url, key } = JSON.parse(config);
+                const urlInput = document.getElementById('supabaseUrl');
+                const keyInput = document.getElementById('supabaseKey');
+                if (urlInput) urlInput.value = url;
+                if (keyInput) keyInput.value = key;
+                initSupabase(url, key);
+            }
+        }
+
+        function initSupabase(url, key) {
+            if (url && key && window.supabase) {
+                try {
+                    supabaseClient = window.supabase.createClient(url, key);
+                    const syncStatus = document.getElementById('syncStatus');
+                    if (syncStatus) syncStatus.style.display = 'inline-flex';
+                    updateSyncUI('offline', '로그인 필요');
+                } catch (e) {
+                    console.error('Supabase init error:', e);
+                    showToast('error', 'Supabase 설정 오류');
+                }
+            }
+        }
+
+        async function checkSession() {
+            if (!supabaseClient) return;
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                handleSessionChange(session);
+
+                supabaseClient.auth.onAuthStateChange((_event, session) => {
+                    handleSessionChange(session);
+                });
+            } catch (e) {
+                console.error('Session check error:', e);
+            }
+        }
+
+        async function handleSessionChange(session) {
+            currentUser = session?.user || null;
+            const loginBtn = document.getElementById('loginBtn');
+            if (currentUser) {
+                if (loginBtn) {
+                    loginBtn.innerHTML = '&#128682;'; // Logout icon
+                    loginBtn.title = '로그아웃';
+                }
+                updateSyncUI('online', '동기화 중');
+                await syncReflections();
+            } else {
+                if (loginBtn) {
+                    loginBtn.innerHTML = '&#128100;'; // Login icon
+                    loginBtn.title = '로그인';
+                }
+                updateSyncUI('offline', '로그인 필요');
+            }
+        }
+
+        function updateSyncUI(status, text) {
+            const dot = document.getElementById('syncDot');
+            const txt = document.getElementById('syncText');
+            if (dot) dot.className = `sync-dot ${status}`;
+            if (txt) txt.textContent = text;
+        }
+
+        // Modals
+        function openSettings() { document.getElementById('settingsModal').classList.add('show'); }
+        function closeSettings() { document.getElementById('settingsModal').classList.remove('show'); }
+
+        function saveSettings() {
+            const url = document.getElementById('supabaseUrl').value.trim();
+            const key = document.getElementById('supabaseKey').value.trim();
+
+            if (!url || !key) {
+                showToast('error', '모두 입력해주세요.');
+                return;
+            }
+
+            localStorage.setItem(CONFIG_KEY, JSON.stringify({ url, key }));
+            initSupabase(url, key);
+            closeSettings();
+            showToast('success', '저장되었습니다.');
+        }
+
+        function toggleAuth() { currentUser ? handleLogout() : openAuth(); }
+        function openAuth() {
+            if (!supabaseClient) {
+                showToast('error', '설정을 확인해주세요.');
+                openSettings();
+                return;
+            }
+            document.getElementById('authModal').classList.add('show');
+        }
+        function closeAuth() { document.getElementById('authModal').classList.remove('show'); }
+
+        async function handleAuthSubmit() {
+            const email = document.getElementById('authEmail').value.trim();
+            if (!email) return showToast('error', '이메일을 입력해주세요.');
+
+            const btn = document.getElementById('authSubmitBtn');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = '전송 중...';
+            }
+
+            const { error } = await supabaseClient.auth.signInWithOtp({
+                email,
+                options: { emailRedirectTo: window.location.origin }
+            });
+
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '매직링크 전송';
+            }
+
+            if (error) {
+                showToast('error', error.message);
+            } else {
+                showToast('success', '매직링크가 전송되었습니다!');
+                closeAuth();
+            }
+        }
+
+        async function handleLogout() {
+            if (confirm('로그아웃 하시겠습니까?')) {
+                await supabaseClient.auth.signOut();
+                showToast('success', '로그아웃 되었습니다.');
+            }
+        }
+
+        async function syncReflections() {
+            if (!supabaseClient || !currentUser) return;
+
+            updateSyncUI('online', '동기화 중...');
+
+            try {
+                // 1. Fetch from Supabase
+                const { data: remoteData, error } = await supabaseClient
+                    .from('reflections')
+                    .select('data')
+                    .eq('user_id', currentUser.id);
+
+                if (error) throw error;
+
+                const remoteReflections = remoteData.map(d => d.data);
+                const localReflections = getLocalReflections();
+
+                // 2. Merge (Latest wins by id which is timestamp)
+                const mergedMap = new Map();
+                [...localReflections, ...remoteReflections].forEach(r => {
+                    const existing = mergedMap.get(r.id);
+                    if (!existing || new Date(r.createdAt) > new Date(existing.createdAt)) {
+                        mergedMap.set(r.id, r);
+                    }
+                });
+
+                const merged = Array.from(mergedMap.values()).sort((a, b) => b.id - a.id);
+
+                // 3. Save merged to local
+                saveLocalReflections(merged);
+
+                // 4. Push missing/updated to remote
+                for (const reflection of merged) {
+                    // Check if the reflection exists remotely. If not, upsert it.
+                    // We don't need to check if it exists locally, as merged already contains local data.
+                    const existsRemotely = remoteReflections.some(r => r.id === reflection.id);
+
+                    if (!existsRemotely) {
+                        await supabaseClient.from('reflections').upsert({
+                            user_id: currentUser.id,
+                            id: reflection.id, // Using the same ID as primary key in Supabase as well
+                            data: reflection
+                        });
+                    }
+                }
+
+                loadHistory();
+                updateStats();
+                updateSyncUI('online', '동기화 완료');
+            } catch (e) {
+                console.error('Sync error:', e);
+                updateSyncUI('offline', '동기화 오류');
+            }
+        }
+
+        // Updated Data Wrappers
+        function getLocalReflections() { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+        function saveLocalReflections(ref) { localStorage.setItem(STORAGE_KEY, JSON.stringify(ref)); }
+        function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+        window.onclick = (e) => { if (e.target.classList.contains('modal-overlay')) e.target.classList.remove('show'); };
     </script>
 </body>
+
 </html>
