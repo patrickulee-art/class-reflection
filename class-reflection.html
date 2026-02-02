@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수업 성찰 일지 - English Teacher</title>
+    <style>
+        :root {
+            --primary: #4a90a4;
+            --primary-light: #6ba3b5;
+            --primary-dark: #3a7a8f;
+            --accent: #5c9ead;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            margin-bottom: 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            background: var(--surface);
+            padding: 6px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tab:hover {
+            background: var(--border-light);
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .card-header .icon {
+            font-size: 1.5rem;
+        }
+
+        .card-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="datetime-local"],
+        textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: var(--transition);
+            background: var(--surface);
+        }
+
+        input[type="text"]:focus,
+        input[type="datetime-local"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(74, 144, 164, 0.1);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .slider-group {
+            margin-bottom: 24px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .slider-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .slider-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            min-width: 30px;
+            text-align: right;
+        }
+
+        .slider-container {
+            position: relative;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--border);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            background: var(--primary-dark);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: none;
+            box-shadow: var(--shadow);
+        }
+
+        .slider-marks {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            padding: 0 4px;
+        }
+
+        .slider-mark {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--border-light);
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        @media (max-width: 600px) {
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+
+        /* Statistics Styles */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            padding: 20px;
+            border-radius: var(--radius);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .chart-container {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bar-label {
+            min-width: 140px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 24px;
+            background: var(--border-light);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 12px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 8px;
+        }
+
+        .bar-value {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .trend-chart {
+            height: 200px;
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            padding: 20px 0;
+        }
+
+        .trend-bar {
+            flex: 1;
+            background: linear-gradient(180deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 4px 4px 0 0;
+            transition: height 0.3s ease;
+            position: relative;
+            min-height: 20px;
+        }
+
+        .trend-bar:hover {
+            opacity: 0.8;
+        }
+
+        .trend-bar-label {
+            position: absolute;
+            bottom: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .trend-bar-value {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        /* History Styles */
+        .history-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .history-count {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .history-item {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            transition: var(--transition);
+        }
+
+        .history-item:hover {
+            box-shadow: var(--shadow);
+            border-color: var(--primary-light);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .history-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .history-date {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .history-class {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .history-topic {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .history-scores {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .score-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--border-light);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            min-width: 60px;
+        }
+
+        .score-badge-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .score-badge-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .history-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 600px) {
+            .history-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 900px) {
+            .history-content {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .history-section {
+            padding: 12px;
+            background: var(--border-light);
+            border-radius: var(--radius-sm);
+        }
+
+        .history-section-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .history-section-content {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .history-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 0.9rem;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--text-primary);
+            color: white;
+            padding: 14px 24px;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            padding: 20px;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            transform: scale(0.9);
+            transition: var(--transition);
+        }
+
+        .modal-overlay.show .modal {
+            transform: scale(1);
+        }
+
+        .modal h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .modal p {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 12px;
+            }
+
+            header {
+                padding: 24px 16px;
+                margin-bottom: 16px;
+            }
+
+            header h1 {
+                font-size: 1.4rem;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .tab {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+            }
+
+            .tab span:last-child {
+                display: none;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .bar-label {
+                min-width: 100px;
+                font-size: 0.75rem;
+            }
+
+            .history-scores {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>수업 성찰 일지</h1>
+            <p>수능 영어 수업을 돌아보며 성장하기</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="write">
+                <span>&#128221;</span>
+                <span>작성하기</span>
+            </button>
+            <button class="tab" data-tab="history">
+                <span>&#128218;</span>
+                <span>기록 보기</span>
+            </button>
+            <button class="tab" data-tab="stats">
+                <span>&#128202;</span>
+                <span>통계</span>
+            </button>
+        </div>
+
+        <!-- Write Tab -->
+        <div id="write" class="tab-content active">
+            <form id="reflectionForm">
+                <!-- Basic Info -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="icon">&#128197;</span>
+                        <h2>기본 정보</h2>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="datetime">날짜 및 시간</label>
+                            <input type="datetime-local" id="datetime" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="className">학급/반</label>
+                            <input type="text" id="className" placeholder="예: 3학년 2반" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="topic">수업 주제</label>
+                        <input type="text" id="topic" placeholder="예: 빈칸 추론 유형 전략" required>
+                    </div>
+                </div>
+
+                <!-- Quantitative Evaluation -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="icon">&#128200;</span>
+                        <h2>정량 평가</h2>
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">수업 준비 충실도</span>
+                            <span class="slider-value" id="preparationValue">3</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="preparation" min="1" max="5" value="3">
+                        </div>
+                        <div class="slider-marks">
+                            <span class="slider-mark">1</span>
+                            <span class="slider-mark">2</span>
+                            <span class="slider-mark">3</span>
+                            <span class="slider-mark">4</span>
+                            <span class="slider-mark">5</span>
+                        </div>
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">학생 집중도/참여도</span>
+                            <span class="slider-value" id="engagementValue">3</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="engagement" min="1" max="5" value="3">
+                        </div>
+                        <div class="slider-marks">
+                            <span class="slider-mark">1</span>
+                            <span class="slider-mark">2</span>
+                            <span class="slider-mark">3</span>
+                            <span class="slider-mark">4</span>
+                            <span class="slider-mark">5</span>
+                        </div>
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">시간 관리</span>
+                            <span class="slider-value" id="timeManagementValue">3</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="timeManagement" min="1" max="5" value="3">
+                        </div>
+                        <div class="slider-marks">
+                            <span class="slider-mark">1</span>
+                            <span class="slider-mark">2</span>
+                            <span class="slider-mark">3</span>
+                            <span class="slider-mark">4</span>
+                            <span class="slider-mark">5</span>
+                        </div>
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">자기 만족도</span>
+                            <span class="slider-value" id="satisfactionValue">3</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="satisfaction" min="1" max="5" value="3">
+                        </div>
+                        <div class="slider-marks">
+                            <span class="slider-mark">1</span>
+                            <span class="slider-mark">2</span>
+                            <span class="slider-mark">3</span>
+                            <span class="slider-mark">4</span>
+                            <span class="slider-mark">5</span>
+                        </div>
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">에너지 레벨</span>
+                            <span class="slider-value" id="energyValue">3</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="energy" min="1" max="5" value="3">
+                        </div>
+                        <div class="slider-marks">
+                            <span class="slider-mark">1</span>
+                            <span class="slider-mark">2</span>
+                            <span class="slider-mark">3</span>
+                            <span class="slider-mark">4</span>
+                            <span class="slider-mark">5</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Qualitative Evaluation -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="icon">&#128221;</span>
+                        <h2>정성 평가</h2>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="preparationProcess">&#128218; 수업 준비 과정</label>
+                        <textarea id="preparationProcess" placeholder="준비하면서 느낀 점, 겪었던 문제점 등을 기록하세요"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="strengths">&#128077; 잘한 점</label>
+                        <textarea id="strengths" placeholder="오늘 수업에서 잘된 부분을 적어주세요..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="improvements">&#128736; 개선할 점</label>
+                        <textarea id="improvements" placeholder="다음에 개선하면 좋을 부분을 적어주세요..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="actionItems">&#127919; 다음 수업 적용 사항</label>
+                        <textarea id="actionItems" placeholder="다음 수업에 적용할 구체적인 사항을 적어주세요..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <span>&#128190;</span>
+                        저장하기
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                        <span>&#128260;</span>
+                        초기화
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- History Tab -->
+        <div id="history" class="tab-content">
+            <div class="history-controls">
+                <span class="history-count" id="historyCount">총 0개의 기록</span>
+                <button class="btn btn-secondary" onclick="exportData()">
+                    <span>&#128229;</span>
+                    JSON 내보내기
+                </button>
+            </div>
+            <div class="history-list" id="historyList">
+                <div class="empty-state">
+                    <div class="icon">&#128218;</div>
+                    <h3>아직 기록이 없습니다</h3>
+                    <p>첫 번째 수업 성찰을 작성해보세요!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Tab -->
+        <div id="stats" class="tab-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalReflections">0</div>
+                    <div class="stat-label">총 성찰 기록</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgOverall">-</div>
+                    <div class="stat-label">전체 평균</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="thisMonth">0</div>
+                    <div class="stat-label">이번 달 기록</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="streak">0</div>
+                    <div class="stat-label">연속 기록 일수</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">
+                    <span>&#128202;</span>
+                    항목별 평균 점수
+                </div>
+                <div class="bar-chart" id="avgChart">
+                    <div class="bar-item">
+                        <span class="bar-label">수업 준비 충실도</span>
+                        <div class="bar-track">
+                            <div class="bar-fill" id="avgPreparationBar" style="width: 0%">
+                                <span class="bar-value" id="avgPreparation">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">학생 집중도/참여도</span>
+                        <div class="bar-track">
+                            <div class="bar-fill" id="avgEngagementBar" style="width: 0%">
+                                <span class="bar-value" id="avgEngagement">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">시간 관리</span>
+                        <div class="bar-track">
+                            <div class="bar-fill" id="avgTimeManagementBar" style="width: 0%">
+                                <span class="bar-value" id="avgTimeManagement">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">자기 만족도</span>
+                        <div class="bar-track">
+                            <div class="bar-fill" id="avgSatisfactionBar" style="width: 0%">
+                                <span class="bar-value" id="avgSatisfaction">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">에너지 레벨</span>
+                        <div class="bar-track">
+                            <div class="bar-fill" id="avgEnergyBar" style="width: 0%">
+                                <span class="bar-value" id="avgEnergy">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">
+                    <span>&#128200;</span>
+                    최근 10회 전체 평균 추이
+                </div>
+                <div class="trend-chart" id="trendChart">
+                    <!-- Trend bars will be dynamically inserted -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal">
+            <h3>&#9888; 삭제 확인</h3>
+            <p>이 성찰 기록을 삭제하시겠습니까? 삭제된 기록은 복구할 수 없습니다.</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">취소</button>
+                <button class="btn btn-danger" onclick="confirmDelete()">삭제</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span id="toastIcon"></span>
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        // LocalStorage key
+        const STORAGE_KEY = 'classReflections';
+        let deleteTargetId = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeDatetime();
+            initializeSliders();
+            initializeTabs();
+            loadHistory();
+            updateStats();
+        });
+
+        // Set current datetime
+        function initializeDatetime() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('datetime').value = now.toISOString().slice(0, 16);
+        }
+
+        // Initialize slider value displays
+        function initializeSliders() {
+            const sliders = ['preparation', 'engagement', 'timeManagement', 'satisfaction', 'energy'];
+            sliders.forEach(slider => {
+                const input = document.getElementById(slider);
+                const display = document.getElementById(`${slider}Value`);
+                input.addEventListener('input', () => {
+                    display.textContent = input.value;
+                });
+            });
+        }
+
+        // Tab switching
+        function initializeTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+
+                    const targetId = tab.dataset.tab;
+                    document.getElementById(targetId).classList.add('active');
+
+                    if (targetId === 'history') {
+                        loadHistory();
+                    } else if (targetId === 'stats') {
+                        updateStats();
+                    }
+                });
+            });
+        }
+
+        // Get reflections from LocalStorage
+        function getReflections() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : [];
+        }
+
+        // Save reflections to LocalStorage
+        function saveReflections(reflections) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(reflections));
+        }
+
+        // Form submission
+        document.getElementById('reflectionForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const reflection = {
+                id: Date.now(),
+                datetime: document.getElementById('datetime').value,
+                className: document.getElementById('className').value,
+                topic: document.getElementById('topic').value,
+                scores: {
+                    preparation: parseInt(document.getElementById('preparation').value),
+                    engagement: parseInt(document.getElementById('engagement').value),
+                    timeManagement: parseInt(document.getElementById('timeManagement').value),
+                    satisfaction: parseInt(document.getElementById('satisfaction').value),
+                    energy: parseInt(document.getElementById('energy').value)
+                },
+                preparationProcess: document.getElementById('preparationProcess').value,
+                strengths: document.getElementById('strengths').value,
+                improvements: document.getElementById('improvements').value,
+                actionItems: document.getElementById('actionItems').value,
+                createdAt: new Date().toISOString()
+            };
+
+            const reflections = getReflections();
+            reflections.unshift(reflection);
+            saveReflections(reflections);
+
+            showToast('success', '성찰 기록이 저장되었습니다!');
+            resetForm();
+        });
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('reflectionForm').reset();
+            initializeDatetime();
+            ['preparation', 'engagement', 'timeManagement', 'satisfaction', 'energy'].forEach(slider => {
+                document.getElementById(slider).value = 3;
+                document.getElementById(`${slider}Value`).textContent = '3';
+            });
+        }
+
+        // Load history
+        function loadHistory() {
+            const reflections = getReflections();
+            const historyList = document.getElementById('historyList');
+            const historyCount = document.getElementById('historyCount');
+
+            historyCount.textContent = `총 ${reflections.length}개의 기록`;
+
+            if (reflections.length === 0) {
+                historyList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">&#128218;</div>
+                        <h3>아직 기록이 없습니다</h3>
+                        <p>첫 번째 수업 성찰을 작성해보세요!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            historyList.innerHTML = reflections.map(r => {
+                const date = new Date(r.datetime);
+                const formattedDate = date.toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    weekday: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                const avgScore = ((r.scores.preparation + r.scores.engagement + r.scores.timeManagement +
+                                   r.scores.satisfaction + r.scores.energy) / 5).toFixed(1);
+
+                return `
+                    <div class="history-item">
+                        <div class="history-header">
+                            <div class="history-meta">
+                                <span class="history-date">${formattedDate}</span>
+                                <span class="history-class">${escapeHtml(r.className)}</span>
+                                <span class="history-topic">${escapeHtml(r.topic)}</span>
+                            </div>
+                            <div class="history-scores">
+                                <div class="score-badge">
+                                    <span class="score-badge-value">${r.scores.preparation}</span>
+                                    <span class="score-badge-label">준비</span>
+                                </div>
+                                <div class="score-badge">
+                                    <span class="score-badge-value">${r.scores.engagement}</span>
+                                    <span class="score-badge-label">참여</span>
+                                </div>
+                                <div class="score-badge">
+                                    <span class="score-badge-value">${r.scores.timeManagement}</span>
+                                    <span class="score-badge-label">시간</span>
+                                </div>
+                                <div class="score-badge">
+                                    <span class="score-badge-value">${r.scores.satisfaction}</span>
+                                    <span class="score-badge-label">만족</span>
+                                </div>
+                                <div class="score-badge">
+                                    <span class="score-badge-value">${r.scores.energy}</span>
+                                    <span class="score-badge-label">에너지</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="history-content">
+                            <div class="history-section">
+                                <div class="history-section-title">&#128218; 수업 준비 과정</div>
+                                <div class="history-section-content">${escapeHtml(r.preparationProcess) || '-'}</div>
+                            </div>
+                            <div class="history-section">
+                                <div class="history-section-title">&#128077; 잘한 점</div>
+                                <div class="history-section-content">${escapeHtml(r.strengths) || '-'}</div>
+                            </div>
+                            <div class="history-section">
+                                <div class="history-section-title">&#128736; 개선할 점</div>
+                                <div class="history-section-content">${escapeHtml(r.improvements) || '-'}</div>
+                            </div>
+                            <div class="history-section">
+                                <div class="history-section-title">&#127919; 다음 수업 적용</div>
+                                <div class="history-section-content">${escapeHtml(r.actionItems) || '-'}</div>
+                            </div>
+                        </div>
+                        <div class="history-actions">
+                            <button class="btn btn-danger" onclick="openDeleteModal(${r.id})">
+                                &#128465; 삭제
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update statistics
+        function updateStats() {
+            const reflections = getReflections();
+
+            // Total reflections
+            document.getElementById('totalReflections').textContent = reflections.length;
+
+            if (reflections.length === 0) {
+                document.getElementById('avgOverall').textContent = '-';
+                document.getElementById('thisMonth').textContent = '0';
+                document.getElementById('streak').textContent = '0';
+                ['Preparation', 'Engagement', 'TimeManagement', 'Satisfaction', 'Energy'].forEach(metric => {
+                    document.getElementById(`avg${metric}`).textContent = '-';
+                    document.getElementById(`avg${metric}Bar`).style.width = '0%';
+                });
+                document.getElementById('trendChart').innerHTML = `
+                    <div class="empty-state" style="width: 100%; padding: 40px 0;">
+                        <p>데이터가 부족합니다</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Calculate averages
+            const totals = {
+                preparation: 0,
+                engagement: 0,
+                timeManagement: 0,
+                satisfaction: 0,
+                energy: 0
+            };
+
+            reflections.forEach(r => {
+                totals.preparation += r.scores.preparation;
+                totals.engagement += r.scores.engagement;
+                totals.timeManagement += r.scores.timeManagement;
+                totals.satisfaction += r.scores.satisfaction;
+                totals.energy += r.scores.energy;
+            });
+
+            const count = reflections.length;
+            const avgs = {
+                preparation: (totals.preparation / count).toFixed(1),
+                engagement: (totals.engagement / count).toFixed(1),
+                timeManagement: (totals.timeManagement / count).toFixed(1),
+                satisfaction: (totals.satisfaction / count).toFixed(1),
+                energy: (totals.energy / count).toFixed(1)
+            };
+
+            const overallAvg = ((parseFloat(avgs.preparation) + parseFloat(avgs.engagement) +
+                                parseFloat(avgs.timeManagement) + parseFloat(avgs.satisfaction) +
+                                parseFloat(avgs.energy)) / 5).toFixed(1);
+            document.getElementById('avgOverall').textContent = overallAvg;
+
+            // Update bar charts
+            const metricMap = {
+                preparation: 'Preparation',
+                engagement: 'Engagement',
+                timeManagement: 'TimeManagement',
+                satisfaction: 'Satisfaction',
+                energy: 'Energy'
+            };
+
+            Object.keys(avgs).forEach(key => {
+                const metricName = metricMap[key];
+                document.getElementById(`avg${metricName}`).textContent = avgs[key];
+                document.getElementById(`avg${metricName}Bar`).style.width = `${(avgs[key] / 5) * 100}%`;
+            });
+
+            // This month count
+            const now = new Date();
+            const thisMonthCount = reflections.filter(r => {
+                const date = new Date(r.datetime);
+                return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+            }).length;
+            document.getElementById('thisMonth').textContent = thisMonthCount;
+
+            // Calculate streak
+            const streak = calculateStreak(reflections);
+            document.getElementById('streak').textContent = streak;
+
+            // Trend chart (last 10)
+            updateTrendChart(reflections.slice(0, 10).reverse());
+        }
+
+        // Calculate streak days
+        function calculateStreak(reflections) {
+            if (reflections.length === 0) return 0;
+
+            const dates = [...new Set(reflections.map(r =>
+                new Date(r.datetime).toDateString()
+            ))].sort((a, b) => new Date(b) - new Date(a));
+
+            let streak = 1;
+            const today = new Date().toDateString();
+            const yesterday = new Date(Date.now() - 86400000).toDateString();
+
+            if (dates[0] !== today && dates[0] !== yesterday) {
+                return 0;
+            }
+
+            for (let i = 1; i < dates.length; i++) {
+                const current = new Date(dates[i]);
+                const prev = new Date(dates[i - 1]);
+                const diffDays = Math.round((prev - current) / 86400000);
+
+                if (diffDays === 1) {
+                    streak++;
+                } else {
+                    break;
+                }
+            }
+
+            return streak;
+        }
+
+        // Update trend chart
+        function updateTrendChart(data) {
+            const trendChart = document.getElementById('trendChart');
+
+            if (data.length === 0) {
+                trendChart.innerHTML = `
+                    <div class="empty-state" style="width: 100%; padding: 40px 0;">
+                        <p>데이터가 부족합니다</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const maxScore = 5;
+            trendChart.innerHTML = data.map((r, index) => {
+                const avg = ((r.scores.preparation + r.scores.engagement + r.scores.timeManagement +
+                             r.scores.satisfaction + r.scores.energy) / 5);
+                const height = (avg / maxScore) * 100;
+                const date = new Date(r.datetime);
+                const label = `${date.getMonth() + 1}/${date.getDate()}`;
+
+                return `
+                    <div class="trend-bar" style="height: ${height}%">
+                        <span class="trend-bar-value">${avg.toFixed(1)}</span>
+                        <span class="trend-bar-label">${label}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Export data
+        function exportData() {
+            const reflections = getReflections();
+            if (reflections.length === 0) {
+                showToast('error', '내보낼 데이터가 없습니다.');
+                return;
+            }
+
+            const dataStr = JSON.stringify(reflections, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `class-reflections-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showToast('success', 'JSON 파일이 다운로드되었습니다.');
+        }
+
+        // Delete modal
+        function openDeleteModal(id) {
+            deleteTargetId = id;
+            document.getElementById('deleteModal').classList.add('show');
+        }
+
+        function closeDeleteModal() {
+            deleteTargetId = null;
+            document.getElementById('deleteModal').classList.remove('show');
+        }
+
+        function confirmDelete() {
+            if (deleteTargetId === null) return;
+
+            let reflections = getReflections();
+            reflections = reflections.filter(r => r.id !== deleteTargetId);
+            saveReflections(reflections);
+
+            closeDeleteModal();
+            loadHistory();
+            showToast('success', '기록이 삭제되었습니다.');
+        }
+
+        // Toast notification
+        function showToast(type, message) {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+
+            toast.className = `toast ${type}`;
+            toastIcon.innerHTML = type === 'success' ? '&#10004;' : '&#10006;';
+            toastMessage.textContent = message;
+
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Close modal on outside click
+        document.getElementById('deleteModal').addEventListener('click', (e) => {
+            if (e.target.id === 'deleteModal') {
+                closeDeleteModal();
+            }
+        });
+    </script>
+</body>
+</html>
