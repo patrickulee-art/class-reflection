@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Reflection } from '@/lib/types';
-import { loadReflections, saveReflections } from '@/lib/storage';
+import { loadReflections, saveReflections, getDeletedIds, addDeletedId, removeDeletedId, getSyncedRemoteIds, saveSyncedRemoteIds } from '@/lib/storage';
 import { getSupabaseClient } from '@/lib/supabase';
 
 function formatError(e: unknown): string {
@@ -49,12 +49,35 @@ export function useReflections() {
       const local = loadReflections();
       console.log('[SYNC] Local reflections loaded:', local.length, 'items');
 
-      const remoteReflections: Reflection[] = (remoteData || [])
+      const allRemote: Reflection[] = (remoteData || [])
         .map((row: { data: Reflection }) => row.data)
         .filter((r: Reflection | null) => r != null);
 
-      console.log('[SYNC] Remote reflections parsed:', remoteReflections.length, 'items');
-      console.log('[SYNC] Remote reflection IDs:', remoteReflections.map(r => r.id).join(', '));
+      console.log('[SYNC] Remote reflections parsed:', allRemote.length, 'items');
+      console.log('[SYNC] Remote reflection IDs:', allRemote.map(r => r.id).join(', '));
+
+      // Filter out locally-deleted IDs from remote data
+      const deletedIds = new Set(getDeletedIds());
+      const remoteReflections = allRemote.filter(r => !deletedIds.has(r.id));
+      console.log('[SYNC] Deleted IDs pending:', [...deletedIds].join(', ') || 'none');
+      console.log('[SYNC] Remote after filtering deleted:', remoteReflections.length, 'items');
+
+      // Retry remote deletion for pending deleted IDs
+      if (deletedIds.size > 0) {
+        for (const delId of deletedIds) {
+          try {
+            const { error: delError } = await client.from('reflections').delete().eq('id', delId);
+            if (!delError) {
+              console.log('[SYNC] Retry delete succeeded for ID:', delId);
+              removeDeletedId(delId);
+            } else {
+              console.error('[SYNC] Retry delete failed for ID:', delId, delError.message);
+            }
+          } catch (e) {
+            console.error('[SYNC] Retry delete error for ID:', delId, formatError(e));
+          }
+        }
+      }
 
       // Merge: build map by id, latest createdAt wins
       const merged = new Map<number, Reflection>();
@@ -82,27 +105,47 @@ export function useReflections() {
       setReflections(mergedList);
       console.log('[SYNC] Merged list saved to localStorage and state');
 
-      // Push local-only items to remote
-      const remoteIds = new Set(remoteReflections.map((r) => r.id));
-      const localOnly = mergedList.filter((r) => !remoteIds.has(r.id));
+      // Detect cross-device deletions vs truly new local items
+      const currentRemoteIds = new Set(remoteReflections.map((r) => r.id));
+      const previouslySyncedIds = new Set(getSyncedRemoteIds());
+      const localOnly = mergedList.filter((r) => !currentRemoteIds.has(r.id));
 
-      console.log('[SYNC] Local-only reflections to push:', localOnly.length, 'items');
-      console.log('[SYNC] Local-only reflection IDs:', localOnly.map(r => r.id).join(', '));
+      // Items that were previously on remote but now missing = deleted by another device
+      const deletedByOtherDevice = localOnly.filter((r) => previouslySyncedIds.has(r.id));
+      // Items never seen on remote = truly new local items to push
+      const newLocalItems = localOnly.filter((r) => !previouslySyncedIds.has(r.id));
 
-      if (localOnly.length > 0) {
+      console.log('[SYNC] Local-only items:', localOnly.length);
+      console.log('[SYNC] Deleted by other device:', deletedByOtherDevice.length, deletedByOtherDevice.map(r => r.id).join(', '));
+      console.log('[SYNC] New local items to push:', newLocalItems.length, newLocalItems.map(r => r.id).join(', '));
+
+      // Remove items deleted by other devices from local
+      if (deletedByOtherDevice.length > 0) {
+        const deletedByOtherIds = new Set(deletedByOtherDevice.map(r => r.id));
+        const cleaned = mergedList.filter(r => !deletedByOtherIds.has(r.id));
+        saveReflections(cleaned);
+        setReflections(cleaned);
+        console.log('[SYNC] Removed cross-device deleted items, remaining:', cleaned.length);
+      }
+
+      // Push truly new local items to remote
+      if (newLocalItems.length > 0) {
         try {
-          console.log('[SYNC] Upserting', localOnly.length, 'local-only reflections to remote');
-          const upsertData = localOnly.map((r) => ({ id: r.id, data: r }));
-          console.log('[SYNC] Upsert payload prepared:', upsertData.length, 'records');
+          console.log('[SYNC] Upserting', newLocalItems.length, 'new local reflections to remote');
+          const upsertData = newLocalItems.map((r) => ({ id: r.id, data: r }));
           await client.from('reflections').upsert(upsertData);
           console.log('[SYNC] Upsert successful');
         } catch (e) {
           console.error('[SYNC] Remote push error:', formatError(e));
-          console.error('[SYNC] Push error details:', e);
         }
       } else {
-        console.log('[SYNC] No local-only reflections to push, sync complete');
+        console.log('[SYNC] No new local reflections to push');
       }
+
+      // Save current remote IDs + new local IDs for next sync comparison
+      const allKnownRemoteIds = [...currentRemoteIds, ...newLocalItems.map(r => r.id)];
+      saveSyncedRemoteIds(allKnownRemoteIds);
+      console.log('[SYNC] Saved synced remote IDs:', allKnownRemoteIds.length);
     } catch (e) {
       console.error('[SYNC] Sync error:', formatError(e));
       console.error('[SYNC] Sync error details:', e);
@@ -151,6 +194,11 @@ export function useReflections() {
 
   const deleteReflection = useCallback(async (id: number) => {
     console.log('[SYNC] deleteReflection called for ID:', id);
+
+    // Track deletion BEFORE removing locally (survives refresh)
+    addDeletedId(id);
+    console.log('[SYNC] ID added to deleted tracking:', id);
+
     const current = loadReflections();
     console.log('[SYNC] Current local reflections before delete:', current.length, 'items');
     const filtered = current.filter(r => r.id !== id);
@@ -159,20 +207,27 @@ export function useReflections() {
     console.log('[SYNC] Updated list saved to localStorage');
     setReflections([...filtered]);
 
-    // Sync to Supabase (fire-and-forget)
+    // Delete from Supabase
     const client = getSupabaseClient();
     console.log('[SYNC] Supabase client available:', !!client);
     if (client) {
       try {
         console.log('[SYNC] Deleting reflection from Supabase, ID:', id);
-        await client.from('reflections').delete().match({ id });
-        console.log('[SYNC] Delete successful for reflection ID:', id);
+        const { error } = await client.from('reflections').delete().eq('id', id);
+        if (error) {
+          console.error('[SYNC] Remote delete error:', error.message);
+          console.log('[SYNC] ID kept in deleted tracking for retry on next sync');
+        } else {
+          console.log('[SYNC] Delete successful for reflection ID:', id);
+          removeDeletedId(id);
+          console.log('[SYNC] ID removed from deleted tracking:', id);
+        }
       } catch (e) {
         console.error('[SYNC] Remote delete error:', formatError(e));
-        console.error('[SYNC] Delete error details:', e);
+        console.log('[SYNC] ID kept in deleted tracking for retry on next sync');
       }
     } else {
-      console.log('[SYNC] No Supabase client, reflection deleted locally only');
+      console.log('[SYNC] No Supabase client, reflection deleted locally only (tracked for retry)');
     }
   }, []);
 
