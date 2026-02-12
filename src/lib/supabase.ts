@@ -16,7 +16,7 @@ export function getSupabaseClient(): SupabaseClient | null {
       supabaseInstance = createClient(envUrl, envKey);
       return supabaseInstance;
     } catch (e) {
-      console.error('Supabase init error from env:', e);
+      console.error('Supabase init error from env:', e instanceof Error ? e.message : String(e));
     }
   }
 
@@ -31,7 +31,7 @@ export function getSupabaseClient(): SupabaseClient | null {
           return supabaseInstance;
         }
       } catch (e) {
-        console.error('Supabase init error from config:', e);
+        console.error('Supabase init error from config:', e instanceof Error ? e.message : String(e));
       }
     }
   }
@@ -48,7 +48,7 @@ export function reinitializeSupabase(url: string, key: string): SupabaseClient |
     }
     return supabaseInstance;
   } catch (e) {
-    console.error('Supabase reinit error:', e);
+    console.error('Supabase reinit error:', e instanceof Error ? e.message : String(e));
     return null;
   }
 }

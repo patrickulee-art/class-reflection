@@ -3,6 +3,26 @@ import { Reflection } from '@/lib/types';
 import { getReflections, saveReflections } from '@/lib/storage';
 import { getSupabaseClient } from '@/lib/supabase';
 
+function formatError(e: unknown): string {
+  if (e instanceof Error) return e.message;
+  if (typeof e === 'object' && e !== null) {
+    const obj = e as Record<string, unknown>;
+    if (typeof obj.message === 'string') {
+      const parts = [obj.message];
+      if (typeof obj.code === 'string') parts.unshift(`[${obj.code}]`);
+      if (typeof obj.details === 'string') parts.push(obj.details);
+      if (typeof obj.hint === 'string') parts.push(`Hint: ${obj.hint}`);
+      return parts.join(' ');
+    }
+    try {
+      return JSON.stringify(e);
+    } catch {
+      return String(e);
+    }
+  }
+  return String(e);
+}
+
 export function useReflections() {
   const [reflections, setReflections] = useState<Reflection[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -32,7 +52,7 @@ export function useReflections() {
           data: reflection,
         });
       } catch (e) {
-        console.error('Remote save error:', e);
+        console.error('Remote save error:', formatError(e));
       }
     }
   }, []);
@@ -49,7 +69,7 @@ export function useReflections() {
       try {
         await client.from('reflections').delete().match({ id });
       } catch (e) {
-        console.error('Remote delete error:', e);
+        console.error('Remote delete error:', formatError(e));
       }
     }
   }, []);
@@ -62,7 +82,6 @@ export function useReflections() {
     }
 
     setIsSyncing(true);
-    setIsOnline(true);
 
     try {
       // Fetch all remote reflections (no auth filter - anonymous mode)
@@ -71,6 +90,8 @@ export function useReflections() {
         .select('data');
 
       if (error) throw error;
+
+      setIsOnline(true);
 
       const remoteReflections: Reflection[] = (remoteData || []).map(
         (d: { data: Reflection }) => d.data
@@ -103,7 +124,7 @@ export function useReflections() {
         }
       }
     } catch (e) {
-      console.error('Sync error:', e);
+      console.error('Sync error:', formatError(e));
       setIsOnline(false);
     } finally {
       setIsSyncing(false);
