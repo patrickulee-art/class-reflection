@@ -1,24 +1,24 @@
 import type { Metadata } from 'next';
-import { Inter, Outfit } from 'next/font/google';
+import { DM_Sans, Bricolage_Grotesque } from 'next/font/google';
 import './globals.css';
 
-const inter = Inter({
+const dmSans = DM_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
-  variable: '--font-inter',
+  variable: '--font-dm-sans',
   display: 'swap',
 });
 
-const outfit = Outfit({
+const bricolage = Bricolage_Grotesque({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-outfit',
+  weight: ['400', '600', '700'],
+  variable: '--font-bricolage',
   display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: '수업 성찰 일지 - English Teacher',
-  description: '수능 영어 수업을 돌아보며 성장하기',
+  title: '수업 설계/회고 시스템 v13.0',
+  description: '수업 설계와 회고를 체계적으로 관리하세요',
 };
 
 export default function RootLayout({
@@ -27,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko" className={`${inter.variable} ${outfit.variable}`}>
+    <html lang="ko" className={`${dmSans.variable} ${bricolage.variable}`}>
       <body>{children}</body>
     </html>
   );

@@ -1,20 +1,112 @@
-export interface Scores {
-  preparation: number;
-  engagement: number;
-  timeManagement: number;
-  satisfaction: number;
-  energy: number;
+export type CognitiveLevel = 'none' | 'low' | 'medium' | 'high' | 'story' | 'break';
+
+export interface DefaultEvals {
+  flow: EvalData;
+  kick: EvalData;
+  humor: EvalData;
+  nonverbal: EvalData;
+  board: EvalData;
+}
+
+export interface EvalData {
+  rating: number;
+  comment: string;
+}
+
+export interface CustomEval {
+  id: string;
+  name: string;
+  rating: number;
+  comment: string;
+}
+
+export interface PlanBlock {
+  id: number;
+  title: string;
+  subtitle: string;
+  minutes: number;
+  cognitiveLevel: CognitiveLevel;
+  isStory: boolean;
+  isBreak: boolean;
+  defaultEvals: DefaultEvals;
+  customEvals: CustomEval[];
+  expectedDifficulty: string;
+  memo: string;
+}
+
+export interface ActualBlock {
+  id: number;
+  title: string;
+  subtitle: string;
+  plannedMinutes: number;
+  actualMinutes: number;
+  cognitiveLevel: CognitiveLevel;
+  isStory: boolean;
+  isBreak: boolean;
+  defaultEvals: DefaultEvals;
+  customEvals: CustomEval[];
+  actualDifficulty: string;
+  memo: string;
+  improvements: string;
 }
 
 export interface Reflection {
   id: number;
-  datetime: string;
-  className: string;
-  topic: string;
-  scores: Scores;
-  preparationProcess: string;
-  strengths: string;
-  improvements: string;
-  actionItems: string;
+  date: string;
+  timeStart: string;
+  timeEnd: string;
+  courseTitle: string;
+  sessionNumber: string;
+  totalTimeLimit: number;
+  totalPlannedMinutes: number;
+  totalActualMinutes: number;
+  planBlocks: PlanBlock[];
+  actualBlocks: ActualBlock[];
   createdAt: string;
+}
+
+export function createDefaultEvals(): DefaultEvals {
+  return {
+    flow: { rating: 0, comment: '' },
+    kick: { rating: 0, comment: '' },
+    humor: { rating: 0, comment: '' },
+    nonverbal: { rating: 0, comment: '' },
+    board: { rating: 0, comment: '' },
+  };
+}
+
+export function createPlanBlock(id: number): PlanBlock {
+  return {
+    id,
+    title: '',
+    subtitle: '',
+    minutes: 10,
+    cognitiveLevel: 'medium',
+    isStory: false,
+    isBreak: false,
+    defaultEvals: createDefaultEvals(),
+    customEvals: [],
+    expectedDifficulty: '',
+    memo: '',
+  };
+}
+
+export function createStoryBlock(id: number): PlanBlock {
+  return {
+    ...createPlanBlock(id),
+    title: '썰/휴식',
+    minutes: 5,
+    cognitiveLevel: 'story',
+    isStory: true,
+  };
+}
+
+export function createBreakBlock(id: number): PlanBlock {
+  return {
+    ...createPlanBlock(id),
+    title: '쉬는 시간',
+    minutes: 10,
+    cognitiveLevel: 'break',
+    isBreak: true,
+  };
 }

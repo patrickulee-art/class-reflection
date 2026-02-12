@@ -1,8 +1,8 @@
 import { Reflection } from './types';
 
-export const STORAGE_KEY = 'classReflections';
+const STORAGE_KEY = 'reflections_v13';
 
-export function getReflections(): Reflection[] {
+export function loadReflections(): Reflection[] {
   if (typeof window === 'undefined') return [];
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
