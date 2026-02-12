@@ -1387,6 +1387,11 @@ select:focus {
     }
 }
 
+@keyframes syncPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
 @media (max-width: 600px) {
     body {
         padding: 10px;

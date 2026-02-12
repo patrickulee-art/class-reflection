@@ -31,7 +31,7 @@ function getDefaultBlocks(): { blocks: PlanBlock[]; nextId: number } {
 }
 
 export default function ReflectionApp() {
-  const { reflections, addReflection, deleteReflection } = useReflections();
+  const { reflections, addReflection, deleteReflection, syncWithSupabase, isSyncing, isOnline } = useReflections();
   const { toast, showToast } = useToast();
 
   const [activeView, setActiveView] = useState<'new' | 'list'>('new');
@@ -282,7 +282,7 @@ export default function ReflectionApp() {
         <p>수업 설계와 회고를 체계적으로 관리하세요 v13.0</p>
       </div>
 
-      <div className="tabs">
+      <div className="tabs" style={{ position: 'relative' }}>
         <button
           className={`tab ${activeView === 'new' ? 'active' : ''}`}
           onClick={() => setActiveView('new')}
@@ -295,6 +295,50 @@ export default function ReflectionApp() {
         >
           회고 목록 ({reflections.length})
         </button>
+        <div
+          style={{
+            position: 'absolute',
+            right: '16px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '12px',
+            color: '#9CA3AF',
+            cursor: 'pointer',
+          }}
+          onClick={() => { if (!isSyncing) syncWithSupabase(); }}
+          title={isSyncing ? '동기화 중...' : isOnline ? '온라인 (클릭하여 동기화)' : '오프라인'}
+        >
+          {isSyncing ? (
+            <span
+              style={{
+                display: 'inline-block',
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                backgroundColor: '#FBBF24',
+                animation: 'syncPulse 1s ease-in-out infinite',
+              }}
+            />
+          ) : (
+            <span
+              style={{
+                display: 'inline-block',
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                backgroundColor: isOnline ? '#22C55E' : '#9CA3AF',
+              }}
+            />
+          )}
+          {isSyncing && (
+            <span style={{ fontSize: '11px', color: '#FBBF24', fontWeight: 500 }}>
+              동기화 중...
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="content">
