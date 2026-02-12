@@ -1,0 +1,2799 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수업 설계/회고 시스템 v13.0 - 레이아웃 개편</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* number input 화살표 제거 */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 2px solid #E5E7EB;
+            color: #1A1A1A;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.8;
+            font-size: 14px;
+            color: #9CA3AF;
+        }
+
+        .tabs {
+            display: flex;
+            background: #F6F7F8;
+            border-bottom: 2px solid #E5E7EB;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: #9CA3AF;
+            transition: all 0.3s;
+            border: none;
+            background: none;
+            font-size: 16px;
+        }
+
+        .tab.active {
+            color: #FF6B6B;
+            background: white;
+            border-bottom: 3px solid #FF6B6B;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* 기본 정보 */
+        .basic-info {
+            background: #F6F7F8;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+        }
+
+        .basic-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #6B7280;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="time"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1.5px solid #E5E7EB;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #FF6B6B;
+        }
+
+        /* 총 시간 설정 */
+        .time-settings {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .time-settings select {
+            width: 180px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #FF6B6B;
+            background: #F6F7F8;
+            border-radius: 10px;
+        }
+
+        .time-display {
+            font-size: 28px;
+            font-weight: 700;
+            color: #FF6B6B;
+        }
+
+        .time-status {
+            font-size: 14px;
+            color: #9CA3AF;
+        }
+
+        .time-warning {
+            background: #FEF2F2;
+            color: #EF4444;
+            font-weight: 600;
+            border-radius: 20px;
+            padding: 2px 12px;
+            display: inline-block;
+        }
+
+        .time-ok {
+            background: #F0FDF4;
+            color: #22C55E;
+            font-weight: 600;
+            border-radius: 20px;
+            padding: 2px 12px;
+            display: inline-block;
+        }
+
+        /* 인지 악보 미리보기 */
+        .cognitive-score-preview {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #E5E7EB;
+        }
+
+        .cognitive-score-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1A1A1A;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cognitive-graph {
+            display: flex;
+            align-items: flex-end;
+            height: 150px;
+            gap: 0;
+            background: #F6F7F8;
+            padding: 15px;
+            padding-bottom: 35px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .cognitive-bar {
+            min-width: 20px;
+            border-radius: 6px 6px 0 0;
+            transition: all 0.3s;
+            position: relative;
+            cursor: pointer;
+            margin-right: 1px;
+        }
+        
+        .cognitive-bar:last-child {
+            margin-right: 0;
+        }
+
+        .cognitive-bar:hover {
+            opacity: 0.8;
+        }
+
+        .cognitive-bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: #6B7280;
+            white-space: nowrap;
+        }
+
+        .cognitive-legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 35px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #6B7280;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        /* 인지부담 경고 */
+        .cognitive-warning {
+            background: #fff5f5;
+            border-left: 4px solid #fc8181;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .cognitive-warning-title {
+            font-weight: 700;
+            color: #c53030;
+            margin-bottom: 5px;
+        }
+
+        .cognitive-warning-text {
+            color: #742a2a;
+            font-size: 14px;
+        }
+
+        /* 인지부담 통계 */
+        .cognitive-stats {
+            background: #f0fff4;
+            border-left: 4px solid #68d391;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .cognitive-stats-title {
+            font-weight: 700;
+            color: #276749;
+            margin-bottom: 10px;
+        }
+
+        .cognitive-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .stat-item {
+            font-size: 13px;
+            color: #22543d;
+        }
+
+        /* 아코디언 블록 - 인지부담 색상 */
+        .accordion-block {
+            margin-bottom: 5px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+            border: 1px solid #E5E7EB;
+            cursor: move;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .accordion-block.dragging {
+            opacity: 0.4;
+            transform: scale(0.98);
+        }
+
+        .accordion-block.drag-over-top {
+            border-top: 4px solid #FF6B6B;
+            padding-top: 20px;
+        }
+
+        .accordion-block.drag-over-bottom {
+            border-bottom: 4px solid #FF6B6B;
+            padding-bottom: 20px;
+        }
+
+        .drop-zone {
+            height: 20px;
+            margin: 0 0 5px 0;
+            border: 3px dashed #cbd5e0;
+            border-radius: 8px;
+            background: #F6F7F8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #a0aec0;
+            font-size: 13px;
+            transition: all 0.2s;
+            opacity: 0;
+        }
+
+        .drop-zone.active {
+            opacity: 1;
+            border-color: #FF6B6B;
+            background: #FEF2F2;
+            color: #FF6B6B;
+        }
+
+        .btn-delete-hover {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 28px;
+            height: 28px;
+            background: #fee2e2;
+            color: #dc2626;
+            border: 2px solid white;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .accordion-block:hover .btn-delete-hover {
+            opacity: 1;
+        }
+
+        .btn-delete-hover:hover {
+            background: #fecaca;
+            transform: scale(1.1);
+        }
+
+        .drag-handle {
+            font-size: 20px;
+            cursor: grab;
+            padding: 0 8px;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+            user-select: none;
+            flex-shrink: 0;
+        }
+
+        .drag-handle:hover {
+            opacity: 1;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .drag-hint {
+            background: #ebf8ff;
+            border: 2px dashed #4299e1;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            color: #2c5282;
+            font-size: 14px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .accordion-header {
+            color: #1A1A1A;
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            user-select: none;
+        }
+
+        .accordion-header.cognitive-low {
+            background: #f0fdf4;
+            border-left: 4px solid #86efac;
+        }
+
+        .accordion-header.cognitive-medium {
+            background: #fffbeb;
+            border-left: 4px solid #fcd34d;
+        }
+
+        .accordion-header.cognitive-high {
+            background: #fef2f2;
+            border-left: 4px solid #fca5a5;
+        }
+
+        .accordion-header.cognitive-story {
+            background: #eff6ff;
+            border-left: 4px solid #93c5fd;
+        }
+
+        .accordion-header.cognitive-break {
+            background: #000000;
+            border-left: 5px solid #fbbf24;
+            color: #ffffff;
+        }
+        
+        .accordion-header.cognitive-break input {
+            color: #ffffff !important;
+            background: rgba(255,255,255,0.15) !important;
+            border-color: rgba(251, 191, 36, 0.5) !important;
+        }
+        
+        .accordion-header.cognitive-break input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+        
+        .accordion-header.cognitive-break .accordion-icon,
+        .accordion-header.cognitive-break span {
+            color: #ffffff;
+        }
+
+        .accordion-header.cognitive-none {
+            background: #faf5ff;
+            border-left: 4px solid #c4b5fd;
+        }
+
+        .accordion-header:hover {
+            filter: brightness(0.95);
+        }
+
+        .accordion-header.actual {
+            filter: brightness(1.1);
+        }
+
+        .accordion-header.actual:hover {
+            filter: brightness(1.05);
+        }
+
+        .accordion-title-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+            flex-wrap: nowrap;
+        }
+
+        .accordion-icon {
+            font-size: 20px;
+            transition: transform 0.3s;
+            flex-shrink: 0;
+        }
+
+        .accordion-block.open .accordion-icon {
+            transform: rotate(90deg);
+        }
+
+        .block-type-badge {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .accordion-title-input {
+            font-size: 14px;
+            font-weight: 500;
+            background: rgba(255,255,255,0.3);
+            border: 2px solid transparent;
+            padding: 6px 10px;
+            border-radius: 6px;
+            min-width: 200px;
+            max-width: 400px;
+            width: auto;
+            transition: all 0.3s;
+            flex-shrink: 1;
+            color: #6B7280;
+        }
+
+        .accordion-title-input:hover {
+            background: rgba(255,255,255,0.6);
+        }
+
+        .accordion-title-input:focus {
+            outline: none;
+            background: white;
+            border-color: #FF6B6B;
+        }
+
+        .accordion-title-input::placeholder {
+            color: #a0aec0;
+            font-size: 13px;
+        }
+
+        .accordion-subtitle-input {
+            font-size: 14px;
+            font-weight: 500;
+            background: rgba(255,255,255,0.3);
+            border: 2px solid transparent;
+            padding: 6px 10px;
+            border-radius: 6px;
+            min-width: 200px;
+            max-width: 500px;
+            width: auto;
+            transition: all 0.3s;
+            flex-shrink: 1;
+            color: #6B7280;
+        }
+
+        .accordion-subtitle-input:hover {
+            background: rgba(255,255,255,0.6);
+        }
+
+        .accordion-subtitle-input:focus {
+            outline: none;
+            background: white;
+            border-color: #FF6B6B;
+        }
+
+        .accordion-subtitle-input::placeholder {
+            color: #a0aec0;
+            font-size: 13px;
+        }
+
+        .cognitive-level-select {
+            padding: 6px 10px;
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 6px;
+            background: rgba(255,255,255,0.7);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .cognitive-level-select:focus {
+            outline: none;
+            border-color: white;
+            background: white;
+        }
+
+        .accordion-time {
+            font-size: 16px;
+            opacity: 0.9;
+            background: rgba(255,255,255,0.3);
+            padding: 5px 12px;
+            border-radius: 6px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .progress-bar-container {
+            position: relative;
+            background: rgba(203, 213, 225, 0.4);
+            height: 12px;
+            border-radius: 6px;
+            overflow: visible;
+            flex: 1;
+            max-width: 150px;
+            cursor: pointer;
+            flex-shrink: 0;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%);
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.2s;
+            position: relative;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .progress-bar-fill.over-limit {
+            background: linear-gradient(90deg, #f87171 0%, #ef4444 100%);
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .progress-percentage {
+            font-size: 14px;
+            opacity: 0.9;
+            min-width: 45px;
+            text-align: right;
+            font-weight: 600;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .progress-percentage.over-limit {
+            color: #fc8181;
+        }
+
+        .accordion-rating-summary {
+            display: flex;
+            gap: 4px;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .accordion-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .btn-delete-accordion {
+            background: rgba(252, 129, 129, 0.8);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-delete-accordion:hover {
+            background: rgba(252, 129, 129, 1);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background: #F6F7F8;
+        }
+
+        .accordion-block.open .accordion-content {
+            max-height: 3000px;
+            transition: max-height 0.5s ease-in;
+        }
+
+        .accordion-inner {
+            padding: 25px;
+        }
+
+        /* 시간 입력 */
+        .time-input-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .time-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .time-input {
+            width: 70px;
+            padding: 8px 12px;
+            border: 1.5px solid #E5E7EB;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .time-range-display {
+            background: #E5E7EB;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-weight: 600;
+            color: #6B7280;
+        }
+
+        /* 평가 항목 */
+        .default-evals {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .default-eval-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1.5px solid #E5E7EB;
+        }
+
+        .custom-evals {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .custom-eval-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .eval-label-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+
+        .eval-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #6B7280;
+        }
+
+        .eval-label-required {
+            color: #FF6B6B;
+        }
+
+        .tooltip-icon {
+            color: #a0aec0;
+            cursor: help;
+            font-size: 12px;
+            position: relative;
+        }
+
+        .tooltip-icon:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2d3748;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1000;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip-text::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #2d3748 transparent transparent transparent;
+        }
+
+        .stars-container {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+
+        .star {
+            cursor: pointer;
+            font-size: 18px;
+            color: #E5E7EB;
+            transition: color 0.2s;
+        }
+
+        .star.active {
+            color: #fbbf24;
+        }
+
+        .star:hover {
+            color: #fbbf24;
+        }
+
+        .comment-input {
+            width: 100%;
+            padding: 8px;
+            border: 1.5px solid #E5E7EB;
+            border-radius: 12px;
+            font-size: 12px;
+            resize: vertical;
+            min-height: 100px;
+            line-height: 1.5;
+        }
+
+        .btn-remove-eval {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #fc8181;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .add-eval-section {
+            margin-bottom: 20px;
+        }
+
+        .btn-add-eval {
+            background: #68d391;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .btn-add-eval:hover {
+            background: #48bb78;
+        }
+
+        .eval-dropdown {
+            display: inline-block;
+            position: relative;
+        }
+
+        .eval-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1.5px solid #E5E7EB;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 100;
+            margin-top: 5px;
+            min-width: 200px;
+        }
+
+        .eval-dropdown-menu.show {
+            display: block;
+        }
+
+        .eval-option {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #F6F7F8;
+        }
+
+        .eval-option:last-child {
+            border-bottom: none;
+        }
+
+        .eval-option:hover {
+            background: #F6F7F8;
+        }
+
+        .eval-option.custom-input {
+            padding: 5px;
+        }
+
+        .custom-eval-input {
+            width: 100%;
+            padding: 8px;
+            border: 1.5px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .memo-section {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .memo-title-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+
+        .memo-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #6B7280;
+        }
+
+        .memo-title.important {
+            color: #fc8181;
+        }
+
+        .memo-textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1.5px solid #E5E7EB;
+            border-radius: 12px;
+            font-size: 13px;
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .time-diff-badge {
+            font-size: 14px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 6px;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .time-diff-badge.over {
+            background: rgba(252, 129, 129, 0.2);
+            color: #fc8181;
+        }
+
+        .time-diff-badge.under {
+            background: rgba(104, 211, 145, 0.2);
+            color: #68d391;
+        }
+
+        .time-diff-badge.exact {
+            background: rgba(160, 174, 192, 0.2);
+            color: #a0aec0;
+        }
+
+        /* 버튼 */
+        .btn-add-block {
+            width: calc(33.33% - 7px);
+            padding: 15px;
+            background: #f3f4f6;
+            color: #374151;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-add-block:hover {
+            background: #e5e7eb;
+            border-color: #d1d5db;
+        }
+
+        .btn-add-story {
+            width: calc(33.33% - 7px);
+            padding: 15px;
+            background: #eff6ff;
+            color: #1e40af;
+            border: 1.5px solid #bfdbfe;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        .btn-add-story:hover {
+            background: #dbeafe;
+            border-color: #93c5fd;
+        }
+
+        .btn-add-break {
+            width: calc(33.33% - 7px);
+            padding: 15px;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        .btn-add-break:hover {
+            background: #E5E7EB;
+            border-color: #94a3b8;
+        }
+
+        .buttons-row {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .btn-generate {
+            padding: 20px 40px;
+            background: #FF6B6B;
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-generate:hover {
+            background: #EF4444;
+        }
+
+        .btn-save {
+            width: 100%;
+            padding: 18px;
+            background: #6366F1;
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s;
+        }
+
+        .btn-save:hover {
+            background: #4F46E5;
+        }
+
+        .generate-section {
+            text-align: center;
+            padding: 30px;
+            background: #F6F7F8;
+            border-radius: 16px;
+            margin-bottom: 20px;
+        }
+
+        .generate-hint {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #9CA3AF;
+        }
+
+        .section-divider {
+            margin: 30px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .section-divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #E5E7EB, transparent);
+        }
+
+        .section-divider span {
+            background: white;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+            font-weight: 600;
+            color: #6B7280;
+            font-size: 16px;
+        }
+
+        .reflection-card {
+            background: #F6F7F8;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #FF6B6B;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .reflection-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .reflection-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .reflection-title {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .reflection-date {
+            color: #9CA3AF;
+            font-size: 13px;
+        }
+
+        .reflection-stats {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            font-size: 13px;
+            color: #9CA3AF;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9CA3AF;
+        }
+
+        @media (max-width: 1024px) {
+            .default-evals {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .custom-evals {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-add-block,
+            .btn-add-story {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 10px;
+            }
+
+            .buttons-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .basic-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .time-settings {
+                flex-direction: column;
+            }
+
+            .accordion-title-section {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .accordion-actions {
+                margin-top: 10px;
+            }
+
+            .default-evals {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>수업 회고 시스템</h1>
+            <p>수업 설계와 회고를 체계적으로 관리하세요</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showView('new')">새 회고 작성</button>
+            <button class="tab" onclick="showView('list')">회고 목록</button>
+        </div>
+
+        <div class="content">
+            <div id="newView" class="view active">
+                <div class="basic-info">
+                    <h3 style="margin-bottom: 15px;">📋 기본 정보</h3>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px;">
+                        <div class="form-group">
+                            <label>수업 날짜</label>
+                            <div style="position: relative;">
+                                <input type="date" id="classDate" onchange="updateDateInline()" style="width: 100%;">
+                                <div id="dateInline" style="position: absolute; right: 50px; top: 50%; transform: translateY(-50%); font-size: 12px; color: #6B7280; pointer-events: none;"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>수업 시간</label>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <input type="time" id="classTimeStart" style="flex: 1; font-size: 13px;" onchange="renderPlanAccordions()">
+                                <span style="color: #9CA3AF;">~</span>
+                                <input type="time" id="classTimeEnd" style="flex: 1; font-size: 13px;">
+                            </div>
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>빠른 선택</label>
+                            <div style="display: flex; gap: 8px;">
+                                <button onclick="setTimePreset('afternoon')" style="flex: 1; padding: 4px 8px; background: white; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer; font-size: 11px; color: #374151;">오후수업 (13:30-17:00)</button>
+                                <button onclick="setTimePreset('evening')" style="flex: 1; padding: 4px 8px; background: white; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer; font-size: 11px; color: #374151;">저녁수업 (18:30-22:00)</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label>강의 제목</label>
+                            <input type="text" id="courseTitle">
+                        </div>
+                        <div class="form-group">
+                            <label>차시</label>
+                            <input type="number" id="sessionNumber">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="time-settings">
+                    <label style="margin: 0;">⏱️ 총 시간 설정:</label>
+                    <select id="totalTimeSelect" onchange="updateTotalTimeLimit()">
+                        <option value="40">40분</option>
+                        <option value="50">50분</option>
+                        <option value="60">60분</option>
+                        <option value="70">70분</option>
+                        <option value="80">80분</option>
+                        <option value="90">90분</option>
+                        <option value="100">100분</option>
+                        <option value="120">120분 (2시간)</option>
+                        <option value="150">150분 (2.5시간)</option>
+                        <option value="180">180분 (3시간)</option>
+                        <option value="210" selected>210분 (3.5시간)</option>
+                        <option value="240">240분 (4시간)</option>
+                        <option value="custom">직접 입력</option>
+                    </select>
+                    <input type="number" id="customTimeInput" style="width: 100px; display: none;" onchange="updateCustomTime()">
+                    <span style="font-size: 14px; color: #9CA3AF;">|</span>
+                    <div>
+                        <div class="time-display"><span id="currentMinutes">50</span>분 / <span id="totalMinutes">210</span>분</div>
+                        <div class="time-status" id="timeStatus">✅ 160분 여유</div>
+                    </div>
+                </div>
+
+                <div class="cognitive-score-preview" id="cognitiveScorePreview">
+                    <div class="cognitive-score-title">
+                        🎵 인지 악보 미리보기
+                    </div>
+                    <div class="cognitive-graph" id="cognitiveGraph">
+                        <!-- 자동 생성됨 -->
+                    </div>
+                    <div class="cognitive-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #9ae6b4;"></div>
+                            <span>🟢 낮음</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #fce96a;"></div>
+                            <span>🟡 보통</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #fc8181;"></div>
+                            <span>🔴 높음</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #90cdf4;"></div>
+                            <span>💬 썰/휴식</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-divider">
+                    <span>📝 수업 전 계획</span>
+                </div>
+
+                <div id="planAccordions"></div>
+
+                <div class="buttons-row">
+                    <button class="btn-add-block" onclick="addPlanBlock()">+ 구간 추가</button>
+                    <button class="btn-add-story" onclick="addStoryBlock()">💬 썰 구간 추가</button>
+                    <button class="btn-add-break" onclick="addBreakBlock()">⏰ 쉬는시간 추가</button>
+                </div>
+
+                <div class="section-divider">
+                    <span>✍️ 실제 수업 회고</span>
+                </div>
+
+                <div class="generate-section" id="generateSection">
+                    <button class="btn-generate" onclick="generateActualBlocks()">
+                        🚀 회고 생성하기
+                    </button>
+                    <div class="generate-hint">계획한 구간이 자동으로 복사됩니다</div>
+                </div>
+
+                <div id="actualAccordions" style="display: none;"></div>
+
+                <button class="btn-save" onclick="saveReflection()">💾 회고 저장하기</button>
+            </div>
+
+            <div id="listView" class="view">
+                <div id="reflectionsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const EVAL_OPTIONS = [
+            '학생 참여도',
+            '속도 적절성',
+            '판서',
+            '예문 적절성'
+        ];
+
+        const EVAL_TOOLTIPS = {
+            'flow': '설명의 논리적 흐름과 순서가 적절했는지',
+            'kick': '수업 도입부에서 학생들의 주의를 끌었는지',
+            'humor': '적절한 재미 요소로 집중도를 유지했는지',
+            'nonverbal': '제스처, 표정, 목소리 톤이 효과적이었는지',
+            'exampleQuality': '제시한 예문이 학습 목표에 적합했는지',
+            'expectedDifficulty': '학생들이 어려워할 것으로 예상되는 부분',
+            'memo': '기타 준비 과정에서의 생각이나 메모',
+            'actualDifficulty': '실제 수업에서 학생들이 어려워한 부분',
+            'improvements': '다음 개정 시 반영할 개선 사항'
+        };
+
+        const COGNITIVE_COLORS = {
+            'none': '#e0e7ff',
+            'low': '#d1fae5',
+            'medium': '#fef3c7',
+            'high': '#fee2e2',
+            'story': '#dbeafe',
+            'break': '#cbd5e1'
+        };
+
+        const COGNITIVE_HEIGHT = {
+            'none': 50,
+            'low': 30,
+            'medium': 60,
+            'high': 90,
+            'story': 10,
+            'break': 5
+        };
+
+        let reflections = JSON.parse(localStorage.getItem('reflections_v13')) || [];
+        let planBlocks = [];
+        let actualBlocks = [];
+        let blockIdCounter = 1;
+        let totalTimeLimit = 210;
+        let actualGenerated = false;
+        let draggedElement = null;
+        let draggedIndex = null;
+
+        document.getElementById('classDate').valueAsDate = new Date();
+        updateDateInline();
+
+        function updateDateInline() {
+            const dateInput = document.getElementById('classDate');
+            const dateInline = document.getElementById('dateInline');
+            
+            if (!dateInput.value) {
+                dateInline.textContent = '';
+                return;
+            }
+            
+            const date = new Date(dateInput.value + 'T00:00:00');
+            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+            const dayOfWeek = dayNames[date.getDay()];
+            
+            let dayColor = '#4a5568';
+            if (dayOfWeek === '토') dayColor = '#2563eb';
+            if (dayOfWeek === '일') dayColor = '#dc2626';
+            
+            dateInline.innerHTML = `<span style="color: ${dayColor}; font-weight: 600;">(${dayOfWeek})</span>`;
+        }
+
+        function setTimePreset(preset) {
+            const startInput = document.getElementById('classTimeStart');
+            const endInput = document.getElementById('classTimeEnd');
+            
+            if (preset === 'afternoon') {
+                startInput.value = '13:30';
+                endInput.value = '17:00';
+            } else if (preset === 'evening') {
+                startInput.value = '18:30';
+                endInput.value = '22:00';
+            }
+        }
+
+        // 드래그 앤 드롭 함수
+        function handleDragStart(e, index) {
+            draggedElement = e.currentTarget;
+            draggedIndex = index;
+            e.currentTarget.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            
+            // 모든 드롭존 활성화
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.classList.add('active');
+            });
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            
+            // 드롭존이나 아코디언 위에 있을 때 시각적 피드백
+            const target = e.currentTarget;
+            if (target.classList.contains('drop-zone')) {
+                target.style.borderColor = '#4299e1';
+                target.style.background = '#dbeafe';
+                target.textContent = '여기에 놓기';
+            }
+            
+            return false;
+        }
+
+        function handleDragEnter(e) {
+            const target = e.currentTarget;
+            if (target.classList.contains('accordion-block') && target !== draggedElement) {
+                // 마우스가 블록의 상단/하단 어디에 있는지 확인
+                const rect = target.getBoundingClientRect();
+                const midpoint = rect.top + rect.height / 2;
+                
+                if (e.clientY < midpoint) {
+                    target.classList.add('drag-over-top');
+                    target.classList.remove('drag-over-bottom');
+                } else {
+                    target.classList.add('drag-over-bottom');
+                    target.classList.remove('drag-over-top');
+                }
+            }
+        }
+
+        function handleDragLeave(e) {
+            const target = e.currentTarget;
+            target.classList.remove('drag-over-top', 'drag-over-bottom');
+            
+            if (target.classList.contains('drop-zone')) {
+                target.style.borderColor = '#FF6B6B';
+                target.style.background = '#FEF2F2';
+                target.textContent = '';
+            }
+        }
+
+        function handleDrop(e, dropIndex) {
+            if (e.stopPropagation) e.stopPropagation();
+            e.preventDefault();
+            
+            const target = e.currentTarget;
+            target.classList.remove('drag-over-top', 'drag-over-bottom');
+            
+            // 드롭존에 떨어뜨린 경우
+            if (target.classList.contains('drop-zone')) {
+                const targetIndex = parseInt(target.dataset.index);
+                if (draggedIndex !== targetIndex) {
+                    const draggedBlock = planBlocks[draggedIndex];
+                    planBlocks.splice(draggedIndex, 1);
+                    
+                    // 인덱스 조정
+                    const newIndex = draggedIndex < targetIndex ? targetIndex - 1 : targetIndex;
+                    planBlocks.splice(newIndex, 0, draggedBlock);
+                    
+                    renderPlanAccordions();
+                    updateCognitiveVisualization();
+                }
+                return false;
+            }
+            
+            // 아코디언 블록에 떨어뜨린 경우
+            if (target.classList.contains('accordion-block')) {
+                const rect = target.getBoundingClientRect();
+                const midpoint = rect.top + rect.height / 2;
+                let targetIndex = dropIndex;
+                
+                // 블록의 하단에 떨어뜨린 경우
+                if (e.clientY > midpoint) {
+                    targetIndex = dropIndex + 1;
+                }
+                
+                if (draggedIndex !== targetIndex) {
+                    const draggedBlock = planBlocks[draggedIndex];
+                    planBlocks.splice(draggedIndex, 1);
+                    
+                    // 인덱스 조정
+                    if (draggedIndex < targetIndex) {
+                        targetIndex--;
+                    }
+                    
+                    planBlocks.splice(targetIndex, 0, draggedBlock);
+                    renderPlanAccordions();
+                    updateCognitiveVisualization();
+                }
+            }
+            
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            e.currentTarget.classList.remove('dragging');
+            
+            // 모든 시각적 피드백 제거
+            document.querySelectorAll('.accordion-block').forEach(block => {
+                block.classList.remove('drag-over-top', 'drag-over-bottom');
+            });
+            
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.classList.remove('active');
+                zone.style.borderColor = '';
+                zone.style.background = '';
+                zone.textContent = '';
+            });
+        }
+
+        function showView(view) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            
+            if (view === 'new') {
+                document.getElementById('newView').classList.add('active');
+                document.querySelector('.tab:nth-child(1)').classList.add('active');
+            } else if (view === 'list') {
+                document.getElementById('listView').classList.add('active');
+                document.querySelector('.tab:nth-child(2)').classList.add('active');
+                displayReflections();
+            }
+        }
+
+        function updateTotalTimeLimit() {
+            const select = document.getElementById('totalTimeSelect');
+            const customInput = document.getElementById('customTimeInput');
+            
+            if (select.value === 'custom') {
+                customInput.style.display = 'inline-block';
+                customInput.focus();
+            } else {
+                customInput.style.display = 'none';
+                totalTimeLimit = parseInt(select.value);
+                document.getElementById('totalMinutes').textContent = totalTimeLimit;
+                updateTimeStatus();
+                renderPlanAccordions();
+                updateCognitiveVisualization();
+            }
+        }
+
+        function updateCustomTime() {
+            const customInput = document.getElementById('customTimeInput');
+            const value = parseInt(customInput.value);
+            if (value > 0) {
+                totalTimeLimit = value;
+                document.getElementById('totalMinutes').textContent = totalTimeLimit;
+                updateTimeStatus();
+                renderPlanAccordions();
+                updateCognitiveVisualization();
+            }
+        }
+
+        function toggleAccordion(blockId, type, event) {
+            if (event && (event.target.tagName === 'INPUT' || event.target.tagName === 'BUTTON' || event.target.tagName === 'TEXTAREA' || event.target.tagName === 'SELECT')) {
+                return;
+            }
+            const accordion = document.getElementById(`${type}-accordion-${blockId}`);
+            accordion.classList.toggle('open');
+        }
+
+        function addPlanBlock() {
+            const blockId = blockIdCounter++;
+            const block = {
+                id: blockId,
+                title: '',
+                subtitle: '',
+                minutes: 10,
+                cognitiveLevel: 'medium',
+                isStory: false,
+                isBreak: false,
+                defaultEvals: {
+                    flow: { rating: 0, comment: '' },
+                    kick: { rating: 0, comment: '' },
+                    humor: { rating: 0, comment: '' },
+                    nonverbal: { rating: 0, comment: '' },
+                    board: { rating: 0, comment: '' }
+                },
+                customEvals: [],
+                expectedDifficulty: '',
+                memo: ''
+            };
+            
+            planBlocks.push(block);
+            renderPlanAccordions();
+            updateTimeStatus();
+            updateCognitiveVisualization();
+        }
+
+        function addStoryBlock() {
+            const blockId = blockIdCounter++;
+            const block = {
+                id: blockId,
+                title: '썰/휴식',
+                subtitle: '',
+                minutes: 5,
+                cognitiveLevel: 'story',
+                isStory: true,
+                isBreak: false,
+                defaultEvals: {
+                    flow: { rating: 0, comment: '' },
+                    kick: { rating: 0, comment: '' },
+                    humor: { rating: 0, comment: '' },
+                    nonverbal: { rating: 0, comment: '' },
+                    board: { rating: 0, comment: '' }
+                },
+                customEvals: [],
+                expectedDifficulty: '',
+                memo: ''
+            };
+            
+            planBlocks.push(block);
+            renderPlanAccordions();
+            updateTimeStatus();
+            updateCognitiveVisualization();
+        }
+
+        function addBreakBlock() {
+            const blockId = blockIdCounter++;
+            const block = {
+                id: blockId,
+                title: '쉬는 시간',
+                subtitle: '',
+                minutes: 10,
+                cognitiveLevel: 'break',
+                isStory: false,
+                isBreak: true,
+                defaultEvals: {
+                    flow: { rating: 0, comment: '' },
+                    kick: { rating: 0, comment: '' },
+                    humor: { rating: 0, comment: '' },
+                    nonverbal: { rating: 0, comment: '' },
+                    board: { rating: 0, comment: '' }
+                },
+                customEvals: [],
+                expectedDifficulty: '',
+                memo: ''
+            };
+            
+            planBlocks.push(block);
+            renderPlanAccordions();
+            updateTimeStatus();
+            updateCognitiveVisualization();
+        }
+
+        function removePlanBlock(blockId, event) {
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+            if (confirm('이 구간을 삭제하시겠습니까?')) {
+                planBlocks = planBlocks.filter(b => b.id !== blockId);
+                renderPlanAccordions();
+                updateTimeStatus();
+                updateCognitiveVisualization();
+            }
+        }
+
+        function updatePlanBlockMinutes(blockId, minutes) {
+            const block = planBlocks.find(b => b.id === blockId);
+            if (block) {
+                block.minutes = parseInt(minutes) || 0;
+                renderPlanAccordions();
+                updateTimeStatus();
+                updateCognitiveVisualization();
+            }
+        }
+
+        function deletePlanBlock(blockId) {
+            alert('삭제 버튼 클릭됨! ID: ' + blockId); // 테스트
+            if (confirm('이 구간을 삭제하시겠습니까?')) {
+                planBlocks = planBlocks.filter(b => b.id !== blockId);
+                renderPlanAccordions();
+                updateTimeStatus();
+                updateCognitiveVisualization();
+            }
+        }
+
+        function updatePlanBlockTitle(blockId, title, event) {
+            const block = planBlocks.find(b => b.id === blockId);
+            if (block) {
+                block.title = title;
+            }
+        }
+
+        function updatePlanBlockSubtitle(blockId, subtitle, event) {
+            const block = planBlocks.find(b => b.id === blockId);
+            if (block) {
+                block.subtitle = subtitle;
+            }
+        }
+
+        function changeBlockType(blockId, type) {
+            const block = planBlocks.find(b => b.id === blockId);
+            if (block) {
+                if (type === 'delete') {
+                    // 삭제 처리
+                    if (confirm('이 구간을 삭제하시겠습니까?')) {
+                        planBlocks = planBlocks.filter(b => b.id !== blockId);
+                        renderPlanAccordions();
+                        updateTimeStatus();
+                        updateCognitiveVisualization();
+                    }
+                    return;
+                }
+                
+                if (type === 'normal') {
+                    block.isStory = false;
+                    block.isBreak = false;
+                    block.cognitiveLevel = 'medium';
+                } else if (type === 'story') {
+                    block.isStory = true;
+                    block.isBreak = false;
+                    block.cognitiveLevel = 'story';
+                } else if (type === 'break') {
+                    block.isStory = false;
+                    block.isBreak = true;
+                    block.cognitiveLevel = 'break';
+                }
+                renderPlanAccordions();
+                updateCognitiveVisualization();
+            }
+        }
+
+        function updateKickPreview(blockId, value) {
+            const block = planBlocks.find(b => b.id === blockId);
+            if (block) {
+                block.defaultEvals.kick.comment = value;
+            }
+        }
+
+        function updateCognitiveLevel(blockId, level) {
+            const block = planBlocks.find(b => b.id === blockId);
+            if (block) {
+                block.cognitiveLevel = level;
+                
+                // 현재 열려있는 아코디언 상태 저장
+                const openAccordions = [];
+                document.querySelectorAll('.accordion-block.open').forEach(el => {
+                    const id = el.id.replace('plan-accordion-', '');
+                    openAccordions.push(id);
+                });
+                
+                renderPlanAccordions();
+                updateCognitiveVisualization();
+                
+                // 아코디언 상태 복원
+                openAccordions.forEach(id => {
+                    const accordion = document.getElementById(`plan-accordion-${id}`);
+                    if (accordion) {
+                        accordion.classList.add('open');
+                    }
+                });
+            }
+        }
+
+        function setPlanRating(blockId, category, value, isCustom = false) {
+            const block = planBlocks.find(b => b.id === blockId);
+            if (block) {
+                if (isCustom) {
+                    const customEval = block.customEvals.find(e => e.id === category);
+                    if (customEval) {
+                        customEval.rating = value;
+                    }
+                } else {
+                    block.defaultEvals[category].rating = value;
+                }
+                updateStarsOnly(blockId, 'plan', category, value, isCustom);
+                updateAccordionSummary(blockId, 'plan');
+            }
+        }
+
+        function updateStarsOnly(blockId, type, category, activeValue, isCustom = false) {
+            const selector = isCustom ? 
+                `#${type}-accordion-${blockId} .custom-stars-${category}` :
+                `#${type}-accordion-${blockId} .default-stars-${category}`;
+            const container = document.querySelector(selector);
+            if (container) {
+                const stars = container.querySelectorAll('.star');
+                stars.forEach((star, index) => {
+                    if (index < activeValue) {
+                        star.classList.add('active');
+                    } else {
+                        star.classList.remove('active');
+                    }
+                });
+            }
+        }
+
+        function updateAccordionSummary(blockId, type) {
+            const block = type === 'plan' ? planBlocks.find(b => b.id === blockId) : actualBlocks.find(b => b.id === blockId);
+            if (!block) return;
+
+            const avgRating = getAverageRating(block);
+            const stars = '⭐'.repeat(avgRating);
+            
+            const summaryEl = document.querySelector(`#${type}-accordion-${blockId} .accordion-rating-summary`);
+            if (summaryEl) {
+                summaryEl.textContent = stars || '☆';
+            }
+        }
+
+        function updatePlanComment(blockId, category, value, isCustom = false) {
+            const block = planBlocks.find(b => b.id === blockId);
+            if (block) {
+                if (isCustom) {
+                    const customEval = block.customEvals.find(e => e.id === category);
+                    if (customEval) {
+                        customEval.comment = value;
+                    }
+                } else {
+                    block.defaultEvals[category].comment = value;
+                }
+            }
+        }
+
+        function updatePlanMemo(blockId, field, value) {
+            const block = planBlocks.find(b => b.id === blockId);
+            if (block) {
+                block[field] = value;
+            }
+        }
+
+        function addCustomEval(blockId, evalName) {
+            const block = planBlocks.find(b => b.id === blockId);
+            if (block) {
+                const evalId = `custom-${Date.now()}`;
+                block.customEvals.push({
+                    id: evalId,
+                    name: evalName,
+                    rating: 0,
+                    comment: ''
+                });
+                renderPlanBlockContent(blockId);
+            }
+        }
+
+        function removeCustomEval(blockId, evalId, event) {
+            event.stopPropagation();
+            const block = planBlocks.find(b => b.id === blockId);
+            if (block) {
+                block.customEvals = block.customEvals.filter(e => e.id !== evalId);
+                renderPlanBlockContent(blockId);
+            }
+        }
+
+        function showEvalDropdown(blockId, event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById(`eval-dropdown-${blockId}`);
+            dropdown.classList.toggle('show');
+        }
+
+        function selectEvalOption(blockId, evalName, event) {
+            event.stopPropagation();
+            addCustomEval(blockId, evalName);
+            hideEvalDropdown(blockId);
+        }
+
+        function hideEvalDropdown(blockId) {
+            const dropdown = document.getElementById(`eval-dropdown-${blockId}`);
+            if (dropdown) {
+                dropdown.classList.remove('show');
+            }
+        }
+
+        function addCustomEvalInput(blockId, event) {
+            if (event) event.stopPropagation();
+            const input = document.getElementById(`custom-eval-name-${blockId}`);
+            const value = input.value.trim();
+            if (value) {
+                addCustomEval(blockId, value);
+                input.value = '';
+                hideEvalDropdown(blockId);
+            }
+        }
+
+        function getAverageRating(block) {
+            const ratings = [];
+            
+            if (block.defaultEvals) {
+                Object.values(block.defaultEvals).forEach(e => {
+                    if (e.rating > 0) ratings.push(e.rating);
+                });
+            }
+            
+            if (block.customEvals) {
+                block.customEvals.forEach(e => {
+                    if (e.rating > 0) ratings.push(e.rating);
+                });
+            }
+            
+            if (ratings.length === 0) return 0;
+            return Math.round(ratings.reduce((a, b) => a + b, 0) / ratings.length);
+        }
+
+        function getProgressPercentage(blockIndex) {
+            let cumulative = 0;
+            for (let i = 0; i <= blockIndex; i++) {
+                cumulative += planBlocks[i].minutes;
+            }
+            return Math.min(Math.round((cumulative / totalTimeLimit) * 100), 150);
+        }
+
+        function getCognitiveClass(level) {
+            if (level === 'story') return 'cognitive-story';
+            if (level === 'break') return 'cognitive-break';
+            if (level === 'low') return 'cognitive-low';
+            if (level === 'medium') return 'cognitive-medium';
+            if (level === 'high') return 'cognitive-high';
+            return 'cognitive-none';
+        }
+
+        function updateCognitiveVisualization() {
+            const graphContainer = document.getElementById('cognitiveGraph');
+            
+            if (planBlocks.length === 0) {
+                graphContainer.innerHTML = '<div style="text-align: center; color: #a0aec0; padding: 20px;">구간을 추가하면 인지 악보가 표시됩니다</div>';
+                document.getElementById('cognitiveWarning').innerHTML = '';
+                return;
+            }
+
+            // 총 시간 계산
+            const totalMinutes = planBlocks.reduce((sum, b) => sum + b.minutes, 0);
+            
+            // 그래프 생성 - 너비를 시간에 비례하도록
+            graphContainer.innerHTML = planBlocks.map(block => {
+                const height = COGNITIVE_HEIGHT[block.cognitiveLevel] || 50;
+                const color = COGNITIVE_COLORS[block.cognitiveLevel] || '#8ec5fc';
+                const icon = block.isBreak ? '⏰' : (block.isStory ? '💬' : '');
+                const widthPercent = (block.minutes / totalTimeLimit) * 100;
+                
+                return `
+                    <div class="cognitive-bar" style="height: ${height}%; background: ${color}; width: ${widthPercent}%; flex-grow: 0; flex-shrink: 0;" title="${block.title || '제목없음'} (${block.minutes}분)">
+                        <div class="cognitive-bar-label">${icon}${block.minutes}분</div>
+                    </div>
+                `;
+            }).join('');
+
+            // 인지부담 분석
+            let highCount = 0;
+            let highMinutes = 0;
+            let storyMinutes = 0;
+            let consecutiveHigh = 0;
+            let maxConsecutiveHigh = 0;
+
+            planBlocks.forEach(block => {
+                if (block.cognitiveLevel === 'high') {
+                    highCount++;
+                    highMinutes += block.minutes;
+                    consecutiveHigh += block.minutes;
+                    maxConsecutiveHigh = Math.max(maxConsecutiveHigh, consecutiveHigh);
+                } else {
+                    consecutiveHigh = 0;
+                }
+                
+                if (block.isStory) {
+                    storyMinutes += block.minutes;
+                }
+            });
+
+            // 경고 표시
+        }
+
+        function getTimeDisplay(startMinutes, endMinutes) {
+            const classTimeStart = document.getElementById('classTimeStart').value;
+            
+            if (!classTimeStart) {
+                return `${startMinutes}-${endMinutes}분`;
+            }
+            
+            // 시작 시간 파싱
+            const [hours, mins] = classTimeStart.split(':').map(Number);
+            const startDate = new Date();
+            startDate.setHours(hours, mins, 0, 0);
+            
+            // 시작 시각 계산
+            const actualStart = new Date(startDate.getTime() + startMinutes * 60000);
+            const startHour = String(actualStart.getHours()).padStart(2, '0');
+            const startMin = String(actualStart.getMinutes()).padStart(2, '0');
+            
+            // 종료 시각 계산
+            const actualEnd = new Date(startDate.getTime() + endMinutes * 60000);
+            const endHour = String(actualEnd.getHours()).padStart(2, '0');
+            const endMin = String(actualEnd.getMinutes()).padStart(2, '0');
+            
+            return `${startHour}:${startMin}-${endHour}:${endMin}`;
+        }
+
+        function renderPlanAccordions() {
+            const container = document.getElementById('planAccordions');
+            let cumulative = 0;
+            
+            const blocksHTML = planBlocks.map((block, index) => {
+                const start = cumulative;
+                const end = cumulative + block.minutes;
+                cumulative = end;
+                
+                const timeRange = getTimeDisplay(start, end);
+                
+                const avgRating = getAverageRating(block);
+                const stars = '⭐'.repeat(avgRating);
+                const progress = getProgressPercentage(index);
+                const isOverLimit = progress > 100;
+                const cognitiveClass = getCognitiveClass(block.cognitiveLevel);
+                const blockIcon = block.isBreak ? '⏰' : (block.isStory ? '💬' : '📚');
+                
+                return `
+                    <div class="drop-zone" 
+                         data-index="${index}"
+                         ondragover="handleDragOver(event)"
+                         ondragleave="handleDragLeave(event)"
+                         ondrop="handleDrop(event, ${index})"></div>
+                    <div class="accordion-block" id="plan-accordion-${block.id}"
+                         draggable="true"
+                         ondragstart="handleDragStart(event, ${index})"
+                         ondragover="handleDragOver(event)"
+                         ondragenter="handleDragEnter(event)"
+                         ondragleave="handleDragLeave(event)"
+                         ondrop="handleDrop(event, ${index})"
+                         ondragend="handleDragEnd(event)"
+                         onmouseenter="hoveredBlockId = ${block.id}"
+                         onmouseleave="hoveredBlockId = null">
+                        <div class="accordion-header ${cognitiveClass}" onclick="toggleAccordion(${block.id}, 'plan', event)">
+                            <div style="display: flex; align-items: flex-start; gap: 10px; width: 100%; position: relative;">
+                                <span class="accordion-icon">▶</span>
+                                
+                                <!-- 구간 타입 + 인지부담 + 삭제 세로 배치 -->
+                                <div style="display: flex; flex-direction: column; gap: 5px;" onclick="event.stopPropagation()">
+                                    <!-- 구간 타입 선택 -->
+                                    <div style="display: flex; gap: 3px;">
+                                        <button onclick="changeBlockType(${block.id}, 'normal')" style="padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; background: ${block.isStory || block.isBreak ? 'white' : '#e5e7eb'}; cursor: pointer; font-size: 16px;">📚</button>
+                                        <button onclick="changeBlockType(${block.id}, 'story')" style="padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; background: ${block.isStory ? '#e5e7eb' : 'white'}; cursor: pointer; font-size: 16px;">💬</button>
+                                        <button onclick="changeBlockType(${block.id}, 'break')" style="padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; background: ${block.isBreak ? '#e5e7eb' : 'white'}; cursor: pointer; font-size: 16px;">⏰</button>
+                                    </div>
+                                    <!-- 신호등 (인지부담) -->
+                                    <div style="display: flex; gap: 3px;">
+                                        <button onclick="updateCognitiveLevel(${block.id}, 'low')" style="padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; background: ${block.cognitiveLevel === 'low' ? '#d1fae5' : 'white'}; cursor: pointer; font-size: 16px;">🟢</button>
+                                        <button onclick="updateCognitiveLevel(${block.id}, 'medium')" style="padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; background: ${block.cognitiveLevel === 'medium' ? '#fef3c7' : 'white'}; cursor: pointer; font-size: 16px;">🟡</button>
+                                        <button onclick="updateCognitiveLevel(${block.id}, 'high')" style="padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; background: ${block.cognitiveLevel === 'high' ? '#fee2e2' : 'white'}; cursor: pointer; font-size: 16px;">🔴</button>
+                                    </div>
+                                    <!-- 삭제 버튼 - 📚 버튼 완전 복사 -->
+                                    <div style="display: flex; gap: 3px;">
+                                        <button onclick="changeBlockType(${block.id}, 'delete')" style="padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; background: #fee2e2; cursor: pointer; font-size: 16px;">🗑️</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- 제목/소재/킥 3줄 -->
+                                <div style="flex: 1; display: flex; flex-direction: column; gap: 5px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="color: #6b7280; font-size: 12px; width: 40px;">제목</span>
+                                        <input type="text" class="accordion-title-input" 
+                                               value="${block.title}" 
+                                               tabindex="${index * 4 + 1}"
+                                               onclick="event.stopPropagation()"
+                                               oninput="updatePlanBlockTitle(${block.id}, this.value, event)"
+                                               onfocus="focusedBlockId = ${block.id}"
+                                               onblur="focusedBlockId = null"
+                                               style="width: 300px; font-size: 14px; padding: 4px 8px; border: 1px solid #e5e7eb; border-radius: 4px; background: rgba(255,255,255,0.5); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="color: #6b7280; font-size: 12px; width: 40px;">소재</span>
+                                        <input type="text" class="accordion-subtitle-input" 
+                                               value="${block.subtitle || ''}" 
+                                               tabindex="${index * 4 + 2}"
+                                               onclick="event.stopPropagation()"
+                                               oninput="updatePlanBlockSubtitle(${block.id}, this.value, event)"
+                                               onfocus="focusedBlockId = ${block.id}"
+                                               onblur="focusedBlockId = null"
+                                               style="width: 300px; font-size: 14px; padding: 4px 8px; border: 1px solid #e5e7eb; border-radius: 4px; background: rgba(255,255,255,0.5); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        <!-- 시간을 소재 오른쪽으로 -->
+                                        <input type="number" 
+                                               value="${block.minutes}" 
+                                               tabindex="${index * 4 + 4}"
+                                               onclick="event.stopPropagation()"
+                                               onchange="updatePlanBlockMinutes(${block.id}, this.value)"
+                                               onfocus="focusedBlockId = ${block.id}"
+                                               onblur="focusedBlockId = null"
+                                               min="1"
+                                               style="width: 50px; text-align: center; font-size: 14px; font-weight: 600; color: #6B7280; background: rgba(255,255,255,0.5); border: 1px solid #e5e7eb; border-radius: 4px; padding: 4px; margin-left: 15px;">
+                                        <span style="font-size: 14px; color: #6b7280; margin-left: 2px;">분</span>
+                                        <span style="font-size: 13px; color: #6b7280; white-space: nowrap; margin-left: 5px;">· ${timeRange}</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="color: #6b7280; font-size: 12px; width: 40px;">킥</span>
+                                        <input type="text" 
+                                               value="${block.defaultEvals.kick.comment || ''}" 
+                                               tabindex="${index * 4 + 3}"
+                                               onclick="event.stopPropagation()"
+                                               oninput="updateKickPreview(${block.id}, this.value)"
+                                               onfocus="focusedBlockId = ${block.id}"
+                                               onblur="focusedBlockId = null"
+                                               style="width: 300px; font-size: 14px; padding: 4px 8px; border: 1px solid #e5e7eb; border-radius: 4px; background: rgba(255,255,255,0.5); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-inner" id="plan-content-${block.id}">
+                                ${renderPlanBlockContentHTML(block, start, end)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // 마지막에 드롭존 추가
+            container.innerHTML = blocksHTML + `
+                <div class="drop-zone" 
+                     data-index="${planBlocks.length}"
+                     ondragover="handleDragOver(event)"
+                     ondragleave="handleDragLeave(event)"
+                     ondrop="handleDrop(event, ${planBlocks.length})"></div>
+            `;
+        }
+
+        function renderPlanBlockContent(blockId) {
+            const block = planBlocks.find(b => b.id === blockId);
+            if (!block) return;
+            
+            let cumulative = 0;
+            const blockIndex = planBlocks.findIndex(b => b.id === blockId);
+            for (let i = 0; i < blockIndex; i++) {
+                cumulative += planBlocks[i].minutes;
+            }
+            const start = cumulative;
+            const end = cumulative + block.minutes;
+            
+            const contentEl = document.getElementById(`plan-content-${blockId}`);
+            if (contentEl) {
+                contentEl.innerHTML = renderPlanBlockContentHTML(block, start, end);
+            }
+            updateAccordionSummary(blockId, 'plan');
+        }
+
+        function renderPlanBlockContentHTML(block, start, end) {
+            return `
+                ${block.isBreak ? '<div style="padding: 15px; background: white; border-radius: 8px; font-weight: 600; color: #475569;">⏰ 쉬는시간</div>' : ''}
+                ${block.isStory ? '<div style="padding: 15px; background: white; border-radius: 8px; font-weight: 600; color: #3b82f6;">💬 썰/휴식 구간</div>' : ''}
+                
+                ${!block.isStory && !block.isBreak ? `
+                <div class="default-evals">
+                    ${renderDefaultEval(block.id, 'plan', 'flow', '설명순서/논리흐름', block.defaultEvals.flow)}
+                    ${renderDefaultEval(block.id, 'plan', 'board', '판서', block.defaultEvals.board || {rating: 0, comment: ''})}
+                    ${renderDefaultEval(block.id, 'plan', 'nonverbal', '비언어', block.defaultEvals.nonverbal)}
+                    ${renderDefaultEval(block.id, 'plan', 'humor', '재미/유머', block.defaultEvals.humor)}
+                </div>
+                
+                <div class="custom-evals">
+                    ${block.customEvals.map(eval => renderCustomEval(block.id, 'plan', eval)).join('')}
+                </div>
+                
+                <div class="add-eval-section">
+                    <div class="eval-dropdown">
+                        <button class="btn-add-eval" onclick="showEvalDropdown(${block.id}, event)">+ 평가 항목 추가</button>
+                        <div class="eval-dropdown-menu" id="eval-dropdown-${block.id}">
+                            ${EVAL_OPTIONS.map(opt => `
+                                <div class="eval-option" onclick="selectEvalOption(${block.id}, '${opt}', event)">${opt}</div>
+                            `).join('')}
+                            <div class="eval-option custom-input">
+                                <input type="text" class="custom-eval-input" id="custom-eval-name-${block.id}" 
+                                       onclick="event.stopPropagation()"
+                                       onkeypress="if(event.key==='Enter') addCustomEvalInput(${block.id}, event)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+                
+                <div class="memo-section">
+                    <div class="memo-title-group">
+                        <div class="memo-title">${block.isStory ? '썰 내용' : '강의 준비 시 고민한 부분'}</div>
+                        <div class="tooltip-icon">?
+                            <span class="tooltip-text">${block.isStory ? '어떤 썰을 풀 것인지 간단히 메모' : '학생이 막힐 것 같은 부분, 준비 과정에서의 생각이나 메모'}</span>
+                        </div>
+                    </div>
+                    <textarea class="memo-textarea"
+                              onchange="updatePlanMemo(${block.id}, 'expectedDifficulty', this.value)">${block.expectedDifficulty}</textarea>
+                </div>
+            `;
+        }
+
+        function renderDefaultEval(blockId, type, category, label, data) {
+            const functionPrefix = type === 'plan' ? 'setPlanRating' : 'setActualRating';
+            const commentFunction = type === 'plan' ? 'updatePlanComment' : 'updateActualComment';
+            const tooltip = EVAL_TOOLTIPS[category] || '';
+            
+            return `
+                <div class="default-eval-item">
+                    <div class="eval-label-group">
+                        <div class="eval-label eval-label-required">${label}</div>
+                        ${tooltip ? `<div class="tooltip-icon">?<span class="tooltip-text">${tooltip}</span></div>` : ''}
+                    </div>
+                    <div class="stars-container default-stars-${category}">
+                        ${[1,2,3,4,5].map(i => `<span class="star ${i <= data.rating ? 'active' : ''}" onclick="${functionPrefix}(${blockId}, '${category}', ${i})">★</span>`).join('')}
+                    </div>
+                    <textarea class="comment-input"
+                              onchange="${commentFunction}(${blockId}, '${category}', this.value)">${data.comment}</textarea>
+                </div>
+            `;
+        }
+
+        function renderCustomEval(blockId, type, evalData) {
+            const functionPrefix = type === 'plan' ? 'setPlanRating' : 'setActualRating';
+            const commentFunction = type === 'plan' ? 'updatePlanComment' : 'updateActualComment';
+            const removeFunction = type === 'plan' ? 'removeCustomEval' : 'removeActualCustomEval';
+            
+            return `
+                <div class="custom-eval-item">
+                    <button class="btn-remove-eval" onclick="${removeFunction}(${blockId}, '${evalData.id}', event)">✕</button>
+                    <div class="eval-label">${evalData.name}</div>
+                    <div class="stars-container custom-stars-${evalData.id}">
+                        ${[1,2,3,4,5].map(i => `<span class="star ${i <= evalData.rating ? 'active' : ''}" onclick="${functionPrefix}(${blockId}, '${evalData.id}', ${i}, true)">★</span>`).join('')}
+                    </div>
+                    <textarea class="comment-input"
+                              onchange="${commentFunction}(${blockId}, '${evalData.id}', this.value, true)">${evalData.comment}</textarea>
+                </div>
+            `;
+        }
+
+        function generateActualBlocks() {
+            if (planBlocks.length === 0) {
+                alert('먼저 수업 전 계획을 입력해주세요!');
+                return;
+            }
+            
+            actualBlocks = planBlocks.map(block => ({
+                id: block.id,
+                title: block.title,
+                subtitle: block.subtitle,
+                plannedMinutes: block.minutes,
+                actualMinutes: block.minutes,
+                cognitiveLevel: block.cognitiveLevel,
+                isStory: block.isStory,
+                isBreak: block.isBreak,
+                defaultEvals: {
+                    flow: { rating: 0, comment: '' },
+                    kick: { rating: 0, comment: '' },
+                    humor: { rating: 0, comment: '' },
+                    nonverbal: { rating: 0, comment: '' },
+                    exampleQuality: { rating: 0, comment: '' }
+                },
+                customEvals: block.customEvals.map(e => ({
+                    id: e.id,
+                    name: e.name,
+                    rating: 0,
+                    comment: ''
+                })),
+                actualDifficulty: '',
+                memo: '',
+                improvements: ''
+            }));
+            
+            actualGenerated = true;
+            document.getElementById('generateSection').style.display = 'none';
+            document.getElementById('actualAccordions').style.display = 'block';
+            renderActualAccordions();
+        }
+
+        function setActualRating(blockId, category, value, isCustom = false) {
+            const block = actualBlocks.find(b => b.id === blockId);
+            if (block) {
+                if (isCustom) {
+                    const customEval = block.customEvals.find(e => e.id === category);
+                    if (customEval) {
+                        customEval.rating = value;
+                    }
+                } else {
+                    block.defaultEvals[category].rating = value;
+                }
+                updateStarsOnly(blockId, 'actual', category, value, isCustom);
+                updateAccordionSummary(blockId, 'actual');
+            }
+        }
+
+        function updateActualComment(blockId, category, value, isCustom = false) {
+            const block = actualBlocks.find(b => b.id === blockId);
+            if (block) {
+                if (isCustom) {
+                    const customEval = block.customEvals.find(e => e.id === category);
+                    if (customEval) {
+                        customEval.comment = value;
+                    }
+                } else {
+                    block.defaultEvals[category].comment = value;
+                }
+            }
+        }
+
+        function updateActualMinutes(blockId, minutes) {
+            const block = actualBlocks.find(b => b.id === blockId);
+            if (block) {
+                block.actualMinutes = parseInt(minutes) || 0;
+                renderActualAccordions();
+            }
+        }
+
+        function updateActualMemo(blockId, field, value) {
+            const block = actualBlocks.find(b => b.id === blockId);
+            if (block) {
+                block[field] = value;
+            }
+        }
+
+        function addActualCustomEval(blockId, evalName) {
+            const block = actualBlocks.find(b => b.id === blockId);
+            if (block) {
+                const evalId = `custom-${Date.now()}`;
+                block.customEvals.push({
+                    id: evalId,
+                    name: evalName,
+                    rating: 0,
+                    comment: ''
+                });
+                renderActualBlockContent(blockId);
+            }
+        }
+
+        function removeActualCustomEval(blockId, evalId, event) {
+            event.stopPropagation();
+            const block = actualBlocks.find(b => b.id === blockId);
+            if (block) {
+                block.customEvals = block.customEvals.filter(e => e.id !== evalId);
+                renderActualBlockContent(blockId);
+            }
+        }
+
+        function showActualEvalDropdown(blockId, event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById(`actual-eval-dropdown-${blockId}`);
+            dropdown.classList.toggle('show');
+        }
+
+        function selectActualEvalOption(blockId, evalName, event) {
+            event.stopPropagation();
+            addActualCustomEval(blockId, evalName);
+            hideActualEvalDropdown(blockId);
+        }
+
+        function hideActualEvalDropdown(blockId) {
+            const dropdown = document.getElementById(`actual-eval-dropdown-${blockId}`);
+            if (dropdown) {
+                dropdown.classList.remove('show');
+            }
+        }
+
+        function addActualCustomEvalInput(blockId, event) {
+            if (event) event.stopPropagation();
+            const input = document.getElementById(`actual-custom-eval-name-${blockId}`);
+            const value = input.value.trim();
+            if (value) {
+                addActualCustomEval(blockId, value);
+                input.value = '';
+                hideActualEvalDropdown(blockId);
+            }
+        }
+
+        function renderActualAccordions() {
+            const container = document.getElementById('actualAccordions');
+            let cumulative = 0;
+            
+            container.innerHTML = actualBlocks.map((block, index) => {
+                const start = cumulative;
+                const end = cumulative + block.actualMinutes;
+                cumulative = end;
+                
+                const timeRange = getTimeDisplay(start, end);
+                
+                const diff = block.actualMinutes - block.plannedMinutes;
+                let diffClass = 'exact';
+                let diffText = '계획대로';
+                if (diff > 0) {
+                    diffClass = 'over';
+                    diffText = `+${diff}분`;
+                } else if (diff < 0) {
+                    diffClass = 'under';
+                    diffText = `${diff}분`;
+                }
+                
+                const avgRating = getAverageRating(block);
+                const stars = '⭐'.repeat(avgRating);
+                const progress = Math.min(Math.round((end / totalTimeLimit) * 100), 150);
+                const isOverLimit = progress > 100;
+                const cognitiveClass = getCognitiveClass(block.cognitiveLevel);
+                const blockIcon = block.isBreak ? '⏰' : (block.isStory ? '💬' : '📚');
+                
+                return `
+                    <div class="accordion-block" id="actual-accordion-${block.id}">
+                        <div class="accordion-header ${cognitiveClass} actual" onclick="toggleAccordion(${block.id}, 'actual', event)">
+                            <div class="accordion-title-section">
+                                <span class="accordion-icon">▶</span>
+                                <span class="block-type-badge">${blockIcon}</span>
+                                <span style="font-size: 18px; font-weight: 700;">${block.title}</span>
+                                ${block.subtitle ? `<span style="margin: 0 5px; opacity: 0.4;">|</span><span style="font-size: 14px; font-weight: 500; color: #6B7280;">${block.subtitle}</span>` : ''}
+                                <span class="accordion-time">${block.actualMinutes}분 · ${timeRange}</span>
+                                <span class="time-diff-badge ${diffClass}">${diffText}</span>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill ${isOverLimit ? 'over-limit' : ''}" style="width: ${Math.min(progress, 100)}%"></div>
+                                </div>
+                                <span class="progress-percentage ${isOverLimit ? 'over-limit' : ''}">${progress}%</span>
+                            </div>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-inner" id="actual-content-${block.id}">
+                                ${renderActualBlockContentHTML(block, start, end, diffClass, diffText)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderActualBlockContent(blockId) {
+            const block = actualBlocks.find(b => b.id === blockId);
+            if (!block) return;
+            
+            let cumulative = 0;
+            const blockIndex = actualBlocks.findIndex(b => b.id === blockId);
+            for (let i = 0; i < blockIndex; i++) {
+                cumulative += actualBlocks[i].actualMinutes;
+            }
+            const start = cumulative;
+            const end = cumulative + block.actualMinutes;
+            
+            const diff = block.actualMinutes - block.plannedMinutes;
+            let diffClass = 'exact';
+            let diffText = '계획대로';
+            if (diff > 0) {
+                diffClass = 'over';
+                diffText = `+${diff}분`;
+            } else if (diff < 0) {
+                diffClass = 'under';
+                diffText = `${diff}분`;
+            }
+            
+            const contentEl = document.getElementById(`actual-content-${blockId}`);
+            if (contentEl) {
+                contentEl.innerHTML = renderActualBlockContentHTML(block, start, end, diffClass, diffText);
+            }
+            updateAccordionSummary(blockId, 'actual');
+        }
+
+        function renderActualBlockContentHTML(block, start, end, diffClass, diffText) {
+            return `
+                <div class="time-input-section">
+                    <div class="time-input-group">
+                        <label style="margin: 0;">실제 시간</label>
+                        <input type="number" class="time-input" value="${block.actualMinutes}" 
+                               onchange="updateActualMinutes(${block.id}, this.value)" min="1">
+                        <span>분</span>
+                    </div>
+                    <span class="time-range-display">${start}-${end}분</span>
+                    <span class="time-diff-badge ${diffClass}">${diffText}</span>
+                </div>
+                
+                ${!block.isStory && !block.isBreak ? `
+                <div class="default-evals">
+                    ${renderDefaultEval(block.id, 'actual', 'flow', '설명순서/논리흐름', block.defaultEvals.flow)}
+                    ${renderDefaultEval(block.id, 'actual', 'board', '판서', block.defaultEvals.board || {rating: 0, comment: ''})}
+                    ${renderDefaultEval(block.id, 'actual', 'nonverbal', '비언어', block.defaultEvals.nonverbal)}
+                    ${renderDefaultEval(block.id, 'actual', 'humor', '재미/유머', block.defaultEvals.humor)}
+                </div>
+                
+                <div class="custom-evals">
+                    ${block.customEvals.map(eval => renderCustomEval(block.id, 'actual', eval)).join('')}
+                </div>
+                
+                <div class="add-eval-section">
+                    <div class="eval-dropdown">
+                        <button class="btn-add-eval" onclick="showActualEvalDropdown(${block.id}, event)">+ 평가 항목 추가</button>
+                        <div class="eval-dropdown-menu" id="actual-eval-dropdown-${block.id}">
+                            ${EVAL_OPTIONS.map(opt => `
+                                <div class="eval-option" onclick="selectActualEvalOption(${block.id}, '${opt}', event)">${opt}</div>
+                            `).join('')}
+                            <div class="eval-option custom-input">
+                                <input type="text" class="custom-eval-input" id="actual-custom-eval-name-${block.id}" 
+                                       onclick="event.stopPropagation()"
+                                       onkeypress="if(event.key==='Enter') addActualCustomEvalInput(${block.id}, event)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+                
+                <div class="memo-section">
+                    <div class="memo-title-group">
+                        <div class="memo-title">${block.isStory ? '실제로 한 썰' : '수업 후 메모/반성'}</div>
+                        <div class="tooltip-icon">?
+                            <span class="tooltip-text">${block.isStory ? '실제로 어떤 썰을 풀었는지' : '실제로 막힌 부분, 다음 개정 시 반영할 개선 사항'}</span>
+                        </div>
+                    </div>
+                    <textarea class="memo-textarea"
+                              onchange="updateActualMemo(${block.id}, 'actualDifficulty', this.value)">${block.actualDifficulty}</textarea>
+                </div>
+                            <span class="tooltip-text">${EVAL_TOOLTIPS.memo}</span>
+                        </div>
+                    </div>
+                    <textarea class="memo-textarea"
+                              onchange="updateActualMemo(${block.id}, 'memo', this.value)">${block.memo}</textarea>
+                </div>
+                
+                ${!block.isStory ? `
+                <div class="memo-section">
+                    <div class="memo-title-group">
+                        <div class="memo-title important">🔧 개선할 점</div>
+                        <div class="tooltip-icon">?
+                            <span class="tooltip-text">${EVAL_TOOLTIPS.improvements}</span>
+                        </div>
+                    </div>
+                    <textarea class="memo-textarea"
+                              onchange="updateActualMemo(${block.id}, 'improvements', this.value)">${block.improvements}</textarea>
+                </div>
+                ` : ''}
+            `;
+        }
+
+        function updateTimeStatus() {
+            const currentTotal = planBlocks.reduce((sum, b) => sum + b.minutes, 0);
+            document.getElementById('currentMinutes').textContent = currentTotal;
+            
+            const statusEl = document.getElementById('timeStatus');
+            const diff = currentTotal - totalTimeLimit;
+            
+            if (currentTotal === 0) {
+                statusEl.textContent = '시간을 입력해주세요';
+                statusEl.className = 'time-status';
+            } else if (diff > 0) {
+                statusEl.textContent = `⚠️ ${diff}분 초과`;
+                statusEl.className = 'time-status time-warning';
+            } else if (diff < 0) {
+                statusEl.textContent = `✅ ${Math.abs(diff)}분 여유`;
+                statusEl.className = 'time-status time-ok';
+            } else {
+                statusEl.textContent = '✅ 딱 맞습니다!';
+                statusEl.className = 'time-status time-ok';
+            }
+        }
+
+        function saveReflection() {
+            const classDate = document.getElementById('classDate').value;
+            const classTimeStart = document.getElementById('classTimeStart').value;
+            const classTimeEnd = document.getElementById('classTimeEnd').value;
+            const courseTitle = document.getElementById('courseTitle').value;
+            const sessionNumber = document.getElementById('sessionNumber').value;
+            
+            if (!classDate || !courseTitle || planBlocks.length === 0) {
+                alert('날짜, 강의 제목, 그리고 최소 1개의 계획 구간을 입력해주세요.');
+                return;
+            }
+            
+            if (!actualGenerated) {
+                alert('회고 생성 버튼을 눌러 실제 수업 회고를 작성해주세요.');
+                return;
+            }
+            
+            const reflection = {
+                id: Date.now(),
+                date: classDate,
+                timeStart: classTimeStart,
+                timeEnd: classTimeEnd,
+                courseTitle: courseTitle,
+                sessionNumber: sessionNumber,
+                totalTimeLimit: totalTimeLimit,
+                totalPlannedMinutes: planBlocks.reduce((sum, b) => sum + b.minutes, 0),
+                totalActualMinutes: actualBlocks.reduce((sum, b) => sum + b.actualMinutes, 0),
+                planBlocks: planBlocks,
+                actualBlocks: actualBlocks,
+                createdAt: new Date().toISOString()
+            };
+            
+            reflections.unshift(reflection);
+            localStorage.setItem('reflections_v13', JSON.stringify(reflections));
+            
+            alert('✅ 회고가 저장되었습니다!');
+            
+            planBlocks = [];
+            actualBlocks = [];
+            blockIdCounter = 1;
+            actualGenerated = false;
+            totalTimeLimit = 50;
+            document.getElementById('totalTimeSelect').value = '50';
+            document.getElementById('customTimeInput').style.display = 'none';
+            document.getElementById('totalMinutes').textContent = '50';
+            document.getElementById('planAccordions').innerHTML = '';
+            document.getElementById('actualAccordions').innerHTML = '';
+            document.getElementById('actualAccordions').style.display = 'none';
+            document.getElementById('generateSection').style.display = 'block';
+            document.getElementById('courseTitle').value = '';
+            document.getElementById('sessionNumber').value = '';
+            document.getElementById('classDate').valueAsDate = new Date();
+            
+            initializeDefault5Blocks();
+        }
+
+        function displayReflections() {
+            const list = document.getElementById('reflectionsList');
+            
+            if (reflections.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <h3>아직 작성된 회고가 없습니다</h3>
+                        <p>첫 번째 회고를 작성해보세요!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            list.innerHTML = reflections.map(r => {
+                const timeDiff = r.totalActualMinutes - r.totalPlannedMinutes;
+                const timeDiffText = timeDiff > 0 ? `+${timeDiff}분` : timeDiff < 0 ? `${timeDiff}분` : '계획대로';
+                const timeDiffColor = timeDiff > 0 ? '#fc8181' : timeDiff < 0 ? '#68d391' : '#a0aec0';
+                
+                // 날짜에 요일 추가
+                const date = new Date(r.date + 'T00:00:00');
+                const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+                const dayOfWeek = dayNames[date.getDay()];
+                let dayColor = '#4a5568';
+                if (dayOfWeek === '토') dayColor = '#2563eb';
+                if (dayOfWeek === '일') dayColor = '#dc2626';
+                
+                const dateDisplay = `${r.date} <span style="color: ${dayColor};">(${dayOfWeek})</span>`;
+                const timeDisplay = r.timeStart && r.timeEnd ? `${r.timeStart}-${r.timeEnd}` : r.time || '';
+                
+                return `
+                    <div class="reflection-card">
+                        <div class="reflection-header">
+                            <div class="reflection-title">${r.courseTitle} ${r.sessionNumber ? `- ${r.sessionNumber}차시` : ''}</div>
+                            <div class="reflection-date">${dateDisplay} ${timeDisplay}</div>
+                        </div>
+                        <div class="reflection-stats">
+                            <span>📝 ${r.planBlocks.length}개 구간</span>
+                            <span>⏱️ 계획 ${r.totalPlannedMinutes}분 → 실제 ${r.totalActualMinutes}분</span>
+                            <span style="color: ${timeDiffColor}; font-weight: 600;">${timeDiffText}</span>
+                            <span>🎯 총 시간: ${r.totalTimeLimit}분</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function initializeDefault5Blocks() {
+            for (let i = 0; i < 5; i++) {
+                addPlanBlock();
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.eval-dropdown')) {
+                document.querySelectorAll('.eval-dropdown-menu').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
+
+        // Ctrl+Enter로 새 구간 추가
+        let hoveredBlockId = null; // 마우스 호버 중인 구간
+        let focusedBlockId = null; // 포커스된 구간
+
+        document.addEventListener('keydown', function(event) {
+            // Ctrl+Enter: 새 구간 추가
+            if (event.ctrlKey && event.key === 'Enter') {
+                event.preventDefault();
+                addPlanBlock();
+                return;
+            }
+            
+            // 호버 시 1/2/3: 인지부담 변경 (입력칸 외부에서만)
+            if (hoveredBlockId && !event.target.matches('input, textarea')) {
+                if (event.key === '1') {
+                    event.preventDefault();
+                    updateCognitiveLevel(hoveredBlockId, 'low');
+                    return;
+                }
+                if (event.key === '2') {
+                    event.preventDefault();
+                    updateCognitiveLevel(hoveredBlockId, 'medium');
+                    return;
+                }
+                if (event.key === '3') {
+                    event.preventDefault();
+                    updateCognitiveLevel(hoveredBlockId, 'high');
+                    return;
+                }
+            }
+            
+            // Delete 키: 호버 중인 구간 삭제
+            if (event.key === 'Delete' && hoveredBlockId && !event.target.matches('input, textarea')) {
+                event.preventDefault();
+                if (confirm('이 구간을 삭제하시겠습니까?')) {
+                    planBlocks = planBlocks.filter(b => b.id !== hoveredBlockId);
+                    hoveredBlockId = null;
+                    renderPlanAccordions();
+                    updateTimeStatus();
+                    updateCognitiveVisualization();
+                }
+                return;
+            }
+            
+            // Ctrl+D: 포커스된 구간 삭제
+            if (event.ctrlKey && event.key === 'd' && focusedBlockId) {
+                event.preventDefault();
+                if (confirm('이 구간을 삭제하시겠습니까?')) {
+                    planBlocks = planBlocks.filter(b => b.id !== focusedBlockId);
+                    focusedBlockId = null;
+                    renderPlanAccordions();
+                    updateTimeStatus();
+                    updateCognitiveVisualization();
+                }
+                return;
+            }
+        });
+
+        initializeDefault5Blocks();
+    </script>
+</body>
+</html>
