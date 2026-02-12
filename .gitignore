@@ -158,13 +158,17 @@ secret-*.*
 .claude/skills/*/*/*token*
 
 # ===========================================
-# Node.js (for docs/Nextra)
+# Node.js
 # ===========================================
 node_modules/
 *.tsbuildinfo
 .tscache/
 .next/
 out/
+
+# Environment variables
+.env.local
+.env*.local
 
 # ===========================================
 # Build Tools & Frameworks
@@ -179,3 +183,4 @@ dist-ssr/
 .vercel/
 .netlify/
 .firebase/
+.vercel
