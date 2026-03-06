@@ -20,6 +20,8 @@ interface PlanBlockAccordionProps {
   dragOverPosition: 'top' | 'bottom' | null;
   isDragging: boolean;
   dragIndex: number | null;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
 const EVAL_TOOLTIPS: Record<string, string> = {
@@ -72,6 +74,8 @@ export default function PlanBlockAccordion({
   dragOverPosition,
   isDragging,
   dragIndex,
+  onMouseEnter,
+  onMouseLeave,
 }: PlanBlockAccordionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [evalDropdownOpen, setEvalDropdownOpen] = useState(false);
@@ -79,7 +83,7 @@ export default function PlanBlockAccordion({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const cognitiveClass = `cognitive-${block.cognitiveLevel}`;
-  const blockIcon = block.isBreak ? '⏰' : block.isStory ? '💬' : '📚';
+  const blockIcon = block.isBreak ? '⏰' : block.isStory ? '💬' : block.isProblem ? '✏️' : '📚';
 
   const handleTypeChange = (type: 'normal' | 'story' | 'break') => {
     if (type === 'story') {
@@ -199,6 +203,8 @@ export default function PlanBlockAccordion({
     <div
       className={`accordion-block ${isOpen ? 'open' : ''} ${dragClasses}`}
       draggable
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       onDragStart={(e) => {
         e.dataTransfer.effectAllowed = 'move';
         onDragStart(index);
@@ -215,115 +221,228 @@ export default function PlanBlockAccordion({
         onClick={() => setIsOpen(!isOpen)}
       >
         <div className="accordion-title-section">
-          <span className="accordion-icon">&#9654;</span>
-          <span className="block-type-badge">{blockIcon}</span>
-
-          {/* Block type buttons */}
+          {/* Cognitive level buttons or spacer for alignment */}
           <div
-            style={{ display: 'flex', gap: '2px', flexShrink: 0 }}
+            style={{ display: 'flex', flexDirection: 'column', gap: '3px', flexShrink: 0, marginRight: '10px', width: '34px' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              type="button"
-              style={{
-                border: 'none',
-                background: !block.isStory && !block.isBreak ? 'rgba(255,255,255,0.8)' : 'transparent',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                padding: '2px 6px',
-                fontSize: '16px',
-              }}
-              onClick={() => handleTypeChange('normal')}
-              title="일반 구간"
-            >
-              📚
-            </button>
-            <button
-              type="button"
-              style={{
-                border: 'none',
-                background: block.isStory ? 'rgba(255,255,255,0.8)' : 'transparent',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                padding: '2px 6px',
-                fontSize: '16px',
-              }}
-              onClick={() => handleTypeChange('story')}
-              title="썰 구간"
-            >
-              💬
-            </button>
-            <button
-              type="button"
-              style={{
-                border: 'none',
-                background: block.isBreak ? 'rgba(255,255,255,0.8)' : 'transparent',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                padding: '2px 6px',
-                fontSize: '16px',
-              }}
-              onClick={() => handleTypeChange('break')}
-              title="쉬는 시간"
-            >
-              ⏰
-            </button>
+            {!block.isStory && !block.isBreak && !block.isProblem ? (
+              [
+                { level: 'low' as CognitiveLevel, emoji: '🟢', title: '인지 부하: 낮음' },
+                { level: 'medium' as CognitiveLevel, emoji: '🟡', title: '인지 부하: 보통' },
+                { level: 'high' as CognitiveLevel, emoji: '🔴', title: '인지 부하: 높음' },
+              ].map(({ level, emoji, title }) => (
+                <button
+                  key={level}
+                  type="button"
+                  style={{
+                    border: 'none',
+                    background: block.cognitiveLevel === level ? 'rgba(255,255,255,0.85)' : 'transparent',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    width: '34px',
+                    height: '34px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '18px',
+                    transition: 'background 0.15s',
+                  }}
+                  onClick={() => handleCognitiveChange(level)}
+                  title={title}
+                >
+                  {emoji}
+                </button>
+              ))
+            ) : (
+              <span style={{ fontSize: '20px', textAlign: 'center', paddingTop: '4px' }}>{blockIcon}</span>
+            )}
           </div>
 
-          {/* Cognitive level buttons */}
-          {!block.isStory && !block.isBreak && (
+          {/* Text inputs - vertical layout */}
+          <div
+            style={{ display: 'flex', flex: 1, minWidth: 0, maxWidth: '720px' }}
+          >
+            {/* Input column - all inputs same width */}
             <div
-              style={{ display: 'flex', gap: '2px', flexShrink: 0 }}
-              onClick={(e) => e.stopPropagation()}
+              style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: 0 }}
             >
-              <button
-                type="button"
-                style={{
-                  border: 'none',
-                  background: block.cognitiveLevel === 'low' ? 'rgba(255,255,255,0.8)' : 'transparent',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  padding: '2px 6px',
-                  fontSize: '14px',
-                }}
-                onClick={() => handleCognitiveChange('low')}
-                title="인지 부하: 낮음"
-              >
-                🟢
-              </button>
-              <button
-                type="button"
-                style={{
-                  border: 'none',
-                  background: block.cognitiveLevel === 'medium' ? 'rgba(255,255,255,0.8)' : 'transparent',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  padding: '2px 6px',
-                  fontSize: '14px',
-                }}
-                onClick={() => handleCognitiveChange('medium')}
-                title="인지 부하: 보통"
-              >
-                🟡
-              </button>
-              <button
-                type="button"
-                style={{
-                  border: 'none',
-                  background: block.cognitiveLevel === 'high' ? 'rgba(255,255,255,0.8)' : 'transparent',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  padding: '2px 6px',
-                  fontSize: '14px',
-                }}
-                onClick={() => handleCognitiveChange('high')}
-                title="인지 부하: 높음"
-              >
-                🔴
-              </button>
+              <input
+                type="text"
+                className="accordion-title-input"
+                value={block.title}
+                onChange={(e) => onChange({ ...block, title: e.target.value })}
+                onClick={(e) => e.stopPropagation()}
+                placeholder="제목"
+              />
+              {/* Subtitle - hidden for problem blocks */}
+              {!block.isProblem && (
+                <input
+                  type="text"
+                  className="accordion-subtitle-input"
+                  value={block.subtitle}
+                  onChange={(e) => onChange({ ...block, subtitle: e.target.value })}
+                  onClick={(e) => e.stopPropagation()}
+                  placeholder="소재"
+                />
+              )}
+              {/* Problem number inputs - horizontal layout */}
+              {block.isProblem && (
+                <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {block.kicks.map((num, ki) => (
+                    <div key={ki} style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                      <input
+                        type="text"
+                        value={num}
+                        onChange={(e) => {
+                          const newKicks = [...block.kicks];
+                          newKicks[ki] = e.target.value;
+                          onChange({ ...block, kicks: newKicks });
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder={`${ki + 1}`}
+                        style={{
+                          width: '45px',
+                          textAlign: 'center',
+                          padding: '6px 4px',
+                          border: '1.5px solid #D1D5DB',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          outline: 'none',
+                          background: 'rgba(255,255,255,0.7)',
+                        }}
+                      />
+                      <span style={{ fontSize: '13px', color: '#6B7280' }}>번</span>
+                    </div>
+                  ))}
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <button
+                      type="button"
+                      style={{
+                        border: 'none',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        padding: '0 4px',
+                        fontSize: '14px',
+                        color: '#9CA3AF',
+                        visibility: block.kicks.length > 1 ? 'visible' : 'hidden',
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const newKicks = block.kicks.slice(0, -1);
+                        onChange({ ...block, kicks: newKicks });
+                      }}
+                      title="문제 삭제"
+                    >
+                      -
+                    </button>
+                    <button
+                      type="button"
+                      style={{
+                        border: 'none',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        padding: '0 4px',
+                        fontSize: '14px',
+                        color: '#9CA3AF',
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onChange({ ...block, kicks: [...block.kicks, ''] });
+                      }}
+                      title="문제 추가"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              )}
+              {/* Dynamic kick inputs - hidden for break and problem blocks */}
+              {!block.isBreak && !block.isProblem && block.kicks.map((kick, ki) => (
+                <input
+                  key={ki}
+                  type="text"
+                  className="accordion-subtitle-input"
+                  value={kick}
+                  onChange={(e) => {
+                    const newKicks = [...block.kicks];
+                    newKicks[ki] = e.target.value;
+                    onChange({ ...block, kicks: newKicks });
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  placeholder={`킥 ${ki + 1}`}
+                />
+              ))}
             </div>
-          )}
+            {/* Kick +/- buttons outside input column - hidden for break and problem blocks */}
+            {!block.isBreak && !block.isProblem && (
+              <div
+                style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', flexShrink: 0, width: '36px', marginLeft: '2px' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px' }}>
+                  <button
+                    type="button"
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      padding: '0 4px',
+                      fontSize: '14px',
+                      color: '#9CA3AF',
+                      visibility: block.kicks.length > 1 ? 'visible' : 'hidden',
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const newKicks = block.kicks.slice(0, -1);
+                      onChange({ ...block, kicks: newKicks });
+                    }}
+                    title="킥 삭제"
+                  >
+                    -
+                  </button>
+                  <button
+                    type="button"
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      padding: '0 4px',
+                      fontSize: '14px',
+                      color: '#9CA3AF',
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onChange({ ...block, kicks: [...block.kicks, ''] });
+                    }}
+                    title="킥 추가"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
+        <div
+          style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}
+        >
+          {/* Minutes input */}
+          <input
+            type="number"
+            className="time-input"
+            value={block.minutes}
+            onChange={(e) =>
+              onChange({ ...block, minutes: Math.max(1, Number(e.target.value) || 1) })
+            }
+            onClick={(e) => e.stopPropagation()}
+            min={1}
+            style={{ width: '60px' }}
+          />
+          <span style={{ fontSize: '14px', color: '#6B7280' }}>분</span>
+          {timeRange && (
+            <span className="time-range-display">{timeRange}</span>
+          )}
           {/* Delete button */}
           <button
             type="button"
@@ -343,60 +462,6 @@ export default function PlanBlockAccordion({
           >
             🗑️
           </button>
-
-          {/* Title input */}
-          <input
-            type="text"
-            className="accordion-title-input"
-            value={block.title}
-            onChange={(e) => onChange({ ...block, title: e.target.value })}
-            onClick={(e) => e.stopPropagation()}
-            placeholder="구간 제목"
-          />
-
-          {/* Subtitle input */}
-          <input
-            type="text"
-            className="accordion-subtitle-input"
-            value={block.subtitle}
-            onChange={(e) => onChange({ ...block, subtitle: e.target.value })}
-            onClick={(e) => e.stopPropagation()}
-            placeholder="세부 내용"
-          />
-
-          {/* Kick input - third row concept, shown inline */}
-          <input
-            type="text"
-            className="accordion-subtitle-input"
-            value={block.expectedDifficulty}
-            onChange={(e) =>
-              onChange({ ...block, expectedDifficulty: e.target.value })
-            }
-            onClick={(e) => e.stopPropagation()}
-            placeholder="킥/도입 포인트"
-            style={{ maxWidth: '200px' }}
-          />
-        </div>
-
-        <div
-          style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Minutes input */}
-          <input
-            type="number"
-            className="time-input"
-            value={block.minutes}
-            onChange={(e) =>
-              onChange({ ...block, minutes: Math.max(1, Number(e.target.value) || 1) })
-            }
-            min={1}
-            style={{ width: '60px' }}
-          />
-          <span style={{ fontSize: '14px', color: '#6B7280' }}>분</span>
-          {timeRange && (
-            <span className="time-range-display">{timeRange}</span>
-          )}
         </div>
       </div>
 
@@ -426,7 +491,7 @@ export default function PlanBlockAccordion({
                     onChange={(e) =>
                       handleDefaultEvalCommentChange(key, e.target.value)
                     }
-                    placeholder="코멘트 입력..."
+                    placeholder=""
                   />
                 </div>
               )
@@ -457,7 +522,7 @@ export default function PlanBlockAccordion({
                     onChange={(e) =>
                       updateCustomEvalComment(evalItem.id, e.target.value)
                     }
-                    placeholder="코멘트 입력..."
+                    placeholder=""
                   />
                 </div>
               ))}
@@ -492,7 +557,7 @@ export default function PlanBlockAccordion({
                     value={customEvalInput}
                     onChange={(e) => setCustomEvalInput(e.target.value)}
                     onKeyDown={handleCustomEvalKeyDown}
-                    placeholder="직접 입력 후 Enter"
+                    placeholder=""
                     onClick={(e) => e.stopPropagation()}
                   />
                 </div>
@@ -509,7 +574,7 @@ export default function PlanBlockAccordion({
               className="memo-textarea"
               value={block.memo}
               onChange={(e) => onChange({ ...block, memo: e.target.value })}
-              placeholder="이 구간에 대한 메모..."
+              placeholder=""
             />
           </div>
         </div>

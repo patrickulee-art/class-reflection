@@ -14,6 +14,7 @@ const COGNITIVE_COLORS: Record<CognitiveLevel, string> = {
   high: '#fee2e2',
   story: '#dbeafe',
   break: '#cbd5e1',
+  problem: '#d1d5db',
 };
 
 const COGNITIVE_HEIGHTS: Record<CognitiveLevel, string> = {
@@ -23,6 +24,7 @@ const COGNITIVE_HEIGHTS: Record<CognitiveLevel, string> = {
   high: '90%',
   story: '10%',
   break: '5%',
+  problem: '40%',
 };
 
 const COGNITIVE_LABELS: Record<CognitiveLevel, string> = {
@@ -32,6 +34,7 @@ const COGNITIVE_LABELS: Record<CognitiveLevel, string> = {
   high: '높음',
   story: '썰',
   break: '휴식',
+  problem: '문제풀이',
 };
 
 const LEGEND_ITEMS: { level: CognitiveLevel; label: string }[] = [

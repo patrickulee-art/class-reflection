@@ -1,4 +1,4 @@
-export type CognitiveLevel = 'none' | 'low' | 'medium' | 'high' | 'story' | 'break';
+export type CognitiveLevel = 'none' | 'low' | 'medium' | 'high' | 'story' | 'break' | 'problem';
 
 export interface DefaultEvals {
   flow: EvalData;
@@ -28,9 +28,10 @@ export interface PlanBlock {
   cognitiveLevel: CognitiveLevel;
   isStory: boolean;
   isBreak: boolean;
+  isProblem: boolean;
   defaultEvals: DefaultEvals;
   customEvals: CustomEval[];
-  expectedDifficulty: string;
+  kicks: string[];
   memo: string;
 }
 
@@ -81,12 +82,13 @@ export function createPlanBlock(id: number): PlanBlock {
     title: '',
     subtitle: '',
     minutes: 10,
-    cognitiveLevel: 'medium',
+    cognitiveLevel: 'none',
     isStory: false,
     isBreak: false,
+    isProblem: false,
     defaultEvals: createDefaultEvals(),
     customEvals: [],
-    expectedDifficulty: '',
+    kicks: [''],
     memo: '',
   };
 }
@@ -108,5 +110,16 @@ export function createBreakBlock(id: number): PlanBlock {
     minutes: 10,
     cognitiveLevel: 'break',
     isBreak: true,
+  };
+}
+
+export function createProblemBlock(id: number): PlanBlock {
+  return {
+    ...createPlanBlock(id),
+    title: '문제 풀이 시간',
+    minutes: 6,
+    cognitiveLevel: 'problem',
+    isProblem: true,
+    kicks: [''],
   };
 }

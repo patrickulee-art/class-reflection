@@ -14,9 +14,8 @@ interface BasicInfoProps {
 }
 
 const QUICK_PRESETS = [
-  { label: '1-2', start: '13:30', end: '16:20' },
-  { label: '3-4', start: '16:30', end: '19:20' },
-  { label: '5-6', start: '19:30', end: '22:20' },
+  { label: '오후반', start: '13:30', end: '17:00' },
+  { label: '저녁반', start: '18:30', end: '22:00' },
 ];
 
 export default function BasicInfo({
@@ -72,18 +71,18 @@ export default function BasicInfo({
                   onClassTimeEndChange(preset.end);
                 }}
               >
-                {preset.label}교시
+                {preset.label}
               </button>
             ))}
           </div>
         </div>
         <div className="form-group">
-          <label>교과목명</label>
+          <label>강좌명</label>
           <input
             type="text"
             value={courseTitle}
             onChange={(e) => onCourseTitleChange(e.target.value)}
-            placeholder="예: 영어회화"
+            placeholder=""
           />
         </div>
         <div className="form-group">
@@ -92,7 +91,7 @@ export default function BasicInfo({
             type="text"
             value={sessionNumber}
             onChange={(e) => onSessionNumberChange(e.target.value)}
-            placeholder="예: 1/15"
+            placeholder=""
           />
         </div>
       </div>

@@ -3,11 +3,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   PlanBlock,
-  ActualBlock,
   Reflection,
   createPlanBlock,
   createStoryBlock,
   createBreakBlock,
+  createProblemBlock,
 } from '@/lib/types';
 import { useReflections } from '@/hooks/useReflections';
 import { useToast } from '@/hooks/useToast';
@@ -15,18 +15,16 @@ import BasicInfo from './BasicInfo';
 import TimeSettings from './TimeSettings';
 import CognitiveScorePreview from './CognitiveScorePreview';
 import PlanBlockAccordion from './PlanBlockAccordion';
-import ActualBlockAccordion from './ActualBlockAccordion';
+
 import ReflectionList from './ReflectionList';
 import Toast from './Toast';
+
+const DRAFT_KEY = 'reflection_draft_v1';
 
 function getDefaultBlocks(): { blocks: PlanBlock[]; nextId: number } {
   const blocks: PlanBlock[] = [];
   let id = 1;
-  blocks.push({ ...createPlanBlock(id++), title: '도입/복습', minutes: 10, cognitiveLevel: 'low' });
-  blocks.push({ ...createPlanBlock(id++), title: '핵심 개념 설명', minutes: 30, cognitiveLevel: 'medium' });
-  blocks.push({ ...createPlanBlock(id++), title: '활동/연습', minutes: 25, cognitiveLevel: 'high' });
-  blocks.push({ ...createStoryBlock(id++), minutes: 5 });
-  blocks.push({ ...createPlanBlock(id++), title: '정리/마무리', minutes: 10, cognitiveLevel: 'low' });
+  blocks.push(createPlanBlock(id++));
   return { blocks, nextId: id };
 }
 
@@ -38,35 +36,46 @@ export default function ReflectionApp() {
 
   // Form fields
   const [classDate, setClassDate] = useState('');
-  const [classTimeStart, setClassTimeStart] = useState('');
-  const [classTimeEnd, setClassTimeEnd] = useState('');
+  const [classTimeStart, setClassTimeStart] = useState('13:30');
+  const [classTimeEnd, setClassTimeEnd] = useState('17:00');
   const [courseTitle, setCourseTitle] = useState('');
   const [sessionNumber, setSessionNumber] = useState('');
   const [totalTimeLimit, setTotalTimeLimit] = useState(210);
 
   // Block state
   const [planBlocks, setPlanBlocks] = useState<PlanBlock[]>([]);
-  const [actualBlocks, setActualBlocks] = useState<ActualBlock[]>([]);
   const [blockIdCounter, setBlockIdCounter] = useState(1);
-  const [actualGenerated, setActualGenerated] = useState(false);
+  const [editingReflectionId, setEditingReflectionId] = useState<number | null>(null);
+
+  // Undo history
+  const [undoHistory, setUndoHistory] = useState<PlanBlock[][]>([]);
+  const pushUndo = useCallback(() => {
+    setUndoHistory((prev) => [...prev.slice(-19), JSON.parse(JSON.stringify(planBlocks))]);
+  }, [planBlocks]);
+
+  // Hovered block index (for keyboard shortcuts)
+  const [hoveredBlockIndex, setHoveredBlockIndex] = useState<number | null>(null);
 
   // Drag state
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [dragOverPosition, setDragOverPosition] = useState<'top' | 'bottom' | null>(null);
 
-  // Initialize default blocks
+  // Initialize default blocks (only if no draft exists)
   useEffect(() => {
+    const hasDraft = localStorage.getItem(DRAFT_KEY);
+    if (hasDraft) return;
+
     const { blocks, nextId } = getDefaultBlocks();
     setPlanBlocks(blocks);
     setBlockIdCounter(nextId);
 
-    // Set today's date
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
     setClassDate(`${yyyy}-${mm}-${dd}`);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Keyboard shortcuts
@@ -74,10 +83,53 @@ export default function ReflectionApp() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (activeView !== 'new') return;
 
+      // Don't trigger shortcuts when typing in inputs/textareas
+      const tag = (e.target as HTMLElement)?.tagName;
+      const isTyping = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+
+      // Cmd+Z = undo (always works)
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+        e.preventDefault();
+        setUndoHistory((prev) => {
+          if (prev.length === 0) return prev;
+          const last = prev[prev.length - 1];
+          setPlanBlocks(last);
+          return prev.slice(0, -1);
+        });
+        return;
+      }
+
+      if (isTyping) return;
+
       // Ctrl+Enter = add block
       if (e.ctrlKey && e.key === 'Enter') {
         e.preventDefault();
         addNormalBlock();
+        return;
+      }
+
+      // 1/2/3 = set cognitive level on hovered block
+      if (hoveredBlockIndex !== null && ['1', '2', '3'].includes(e.key)) {
+        e.preventDefault();
+        const level = e.key === '1' ? 'low' : e.key === '2' ? 'medium' : 'high';
+        pushUndo();
+        setPlanBlocks((prev) => {
+          const next = [...prev];
+          const block = next[hoveredBlockIndex];
+          if (block && !block.isStory && !block.isBreak) {
+            next[hoveredBlockIndex] = { ...block, cognitiveLevel: level as PlanBlock['cognitiveLevel'] };
+          }
+          return next;
+        });
+        return;
+      }
+
+      // Shift+Delete or Shift+Backspace = delete hovered block
+      if (hoveredBlockIndex !== null && e.shiftKey && (e.key === 'Delete' || e.key === 'Backspace')) {
+        e.preventDefault();
+        pushUndo();
+        setPlanBlocks((prev) => prev.filter((_, i) => i !== hoveredBlockIndex));
+        setHoveredBlockIndex(null);
         return;
       }
     };
@@ -85,7 +137,7 @@ export default function ReflectionApp() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeView, blockIdCounter]);
+  }, [activeView, blockIdCounter, hoveredBlockIndex, pushUndo]);
 
   // --- Plan block operations ---
 
@@ -104,17 +156,24 @@ export default function ReflectionApp() {
     setBlockIdCounter((prev) => prev + 1);
   }, [blockIdCounter]);
 
+  const addProblemBlock = useCallback(() => {
+    setPlanBlocks((prev) => [...prev, createProblemBlock(blockIdCounter)]);
+    setBlockIdCounter((prev) => prev + 1);
+  }, [blockIdCounter]);
+
   const updatePlanBlock = useCallback((index: number, updated: PlanBlock) => {
+    pushUndo();
     setPlanBlocks((prev) => {
       const next = [...prev];
       next[index] = updated;
       return next;
     });
-  }, []);
+  }, [pushUndo]);
 
   const deletePlanBlock = useCallback((index: number) => {
+    pushUndo();
     setPlanBlocks((prev) => prev.filter((_, i) => i !== index));
-  }, []);
+  }, [pushUndo]);
 
   // --- Drag and drop ---
 
@@ -166,57 +225,20 @@ export default function ReflectionApp() {
     [dragIndex, dragOverPosition, handleDragEnd]
   );
 
-  // --- Generate actual blocks ---
-
-  const generateActualBlocks = useCallback(() => {
-    if (planBlocks.length === 0) {
-      showToast('error', '계획 구간이 없습니다. 구간을 먼저 추가해주세요.');
-      return;
-    }
-
-    const generated: ActualBlock[] = planBlocks.map((pb) => ({
-      id: pb.id,
-      title: pb.title,
-      subtitle: pb.subtitle,
-      plannedMinutes: pb.minutes,
-      actualMinutes: pb.minutes,
-      cognitiveLevel: pb.cognitiveLevel,
-      isStory: pb.isStory,
-      isBreak: pb.isBreak,
-      defaultEvals: JSON.parse(JSON.stringify(pb.defaultEvals)),
-      customEvals: JSON.parse(JSON.stringify(pb.customEvals)),
-      actualDifficulty: '',
-      memo: pb.memo,
-      improvements: '',
-    }));
-
-    setActualBlocks(generated);
-    setActualGenerated(true);
-    showToast('success', `${generated.length}개 실제 수업 구간이 생성되었습니다.`);
-  }, [planBlocks, showToast]);
-
-  const updateActualBlock = useCallback((index: number, updated: ActualBlock) => {
-    setActualBlocks((prev) => {
-      const next = [...prev];
-      next[index] = updated;
-      return next;
-    });
-  }, []);
-
   // --- Save ---
 
+  const [isSaving, setIsSaving] = useState(false);
+
   const handleSave = useCallback(() => {
+    if (isSaving) return;
     if (planBlocks.length === 0) {
       showToast('error', '계획 구간이 없습니다.');
       return;
     }
+    setIsSaving(true);
 
     const totalPlannedMinutes = planBlocks.reduce(
       (sum, b) => sum + b.minutes,
-      0
-    );
-    const totalActualMinutes = actualBlocks.reduce(
-      (sum, b) => sum + b.actualMinutes,
       0
     );
 
@@ -229,26 +251,19 @@ export default function ReflectionApp() {
       sessionNumber,
       totalTimeLimit,
       totalPlannedMinutes,
-      totalActualMinutes,
+      totalActualMinutes: 0,
       planBlocks: JSON.parse(JSON.stringify(planBlocks)),
-      actualBlocks: JSON.parse(JSON.stringify(actualBlocks)),
+      actualBlocks: [],
       createdAt: new Date().toISOString(),
     };
 
     addReflection(reflection);
+    setEditingReflectionId(reflection.id);
     showToast('success', '회고가 저장되었습니다!');
-
-    // Reset form
-    const { blocks, nextId } = getDefaultBlocks();
-    setPlanBlocks(blocks);
-    setBlockIdCounter(nextId);
-    setActualBlocks([]);
-    setActualGenerated(false);
-    setCourseTitle('');
-    setSessionNumber('');
+    setIsSaving(false);
   }, [
+    isSaving,
     planBlocks,
-    actualBlocks,
     classDate,
     classTimeStart,
     classTimeEnd,
@@ -259,6 +274,70 @@ export default function ReflectionApp() {
     showToast,
   ]);
 
+  // --- Load reflection into form ---
+
+  const loadReflection = useCallback((reflection: Reflection) => {
+    setClassDate(reflection.date);
+    setClassTimeStart(reflection.timeStart);
+    setClassTimeEnd(reflection.timeEnd);
+    setCourseTitle(reflection.courseTitle);
+    setSessionNumber(reflection.sessionNumber);
+    setTotalTimeLimit(reflection.totalTimeLimit);
+    setPlanBlocks(JSON.parse(JSON.stringify(reflection.planBlocks)));
+    const maxId = reflection.planBlocks.reduce((max, b) => Math.max(max, b.id), 0);
+    setBlockIdCounter(maxId + 1);
+    setEditingReflectionId(reflection.id);
+    setActiveView('new');
+  }, []);
+
+  // --- Auto-draft (자동 임시저장) ---
+
+  const [draftLoaded, setDraftLoaded] = useState(false);
+
+  // Load draft on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(DRAFT_KEY);
+    if (saved) {
+      try {
+        const draft = JSON.parse(saved);
+        if (draft.planBlocks && draft.planBlocks.length > 0) {
+          setClassDate(draft.classDate || '');
+          setClassTimeStart(draft.classTimeStart || '13:30');
+          setClassTimeEnd(draft.classTimeEnd || '17:00');
+          setCourseTitle(draft.courseTitle || '');
+          setSessionNumber(draft.sessionNumber || '');
+          setTotalTimeLimit(draft.totalTimeLimit || 210);
+          setPlanBlocks(draft.planBlocks);
+          setBlockIdCounter(draft.blockIdCounter || 1);
+          setEditingReflectionId(draft.editingReflectionId || null);
+        }
+      } catch {
+        // ignore invalid draft
+      }
+    }
+    setDraftLoaded(true);
+  }, []);
+
+  // Auto-save draft whenever form state changes
+  useEffect(() => {
+    if (!draftLoaded) return;
+    const timer = setTimeout(() => {
+      const draft = {
+        classDate,
+        classTimeStart,
+        classTimeEnd,
+        courseTitle,
+        sessionNumber,
+        totalTimeLimit,
+        planBlocks,
+        blockIdCounter,
+        editingReflectionId,
+      };
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [draftLoaded, classDate, classTimeStart, classTimeEnd, courseTitle, sessionNumber, totalTimeLimit, planBlocks, blockIdCounter, editingReflectionId]);
+
   // --- Cumulative minutes calculation ---
 
   const planCumulativeMinutes: number[] = [];
@@ -266,13 +345,6 @@ export default function ReflectionApp() {
   for (const b of planBlocks) {
     planCumulativeMinutes.push(runningSum);
     runningSum += b.minutes;
-  }
-
-  const actualCumulativeMinutes: number[] = [];
-  let actualRunningSum = 0;
-  for (const b of actualBlocks) {
-    actualCumulativeMinutes.push(actualRunningSum);
-    actualRunningSum += b.actualMinutes;
   }
 
   return (
@@ -392,13 +464,18 @@ export default function ReflectionApp() {
                 dragOverPosition={dragOverPosition}
                 isDragging={dragIndex !== null}
                 dragIndex={dragIndex}
+                onMouseEnter={() => setHoveredBlockIndex(index)}
+                onMouseLeave={() => setHoveredBlockIndex(null)}
               />
             ))}
 
             {/* Add block buttons */}
             <div className="buttons-row">
               <button className="btn-add-block" onClick={addNormalBlock}>
-                + 구간 추가
+                수업 구간 추가
+              </button>
+              <button className="btn-add-block" onClick={addProblemBlock} style={{ background: '#9CA3AF', color: 'white' }}>
+                ✏️ 문제 풀이 구간 추가
               </button>
               <button className="btn-add-story" onClick={addStoryBlock}>
                 💬 썰 구간 추가
@@ -408,41 +485,12 @@ export default function ReflectionApp() {
               </button>
             </div>
 
-            {/* Generate actual blocks */}
-            <div className="generate-section">
-              <button className="btn-generate" onClick={generateActualBlocks}>
-                🎯 실제 수업 구간 생성
-              </button>
-              <div className="generate-hint">
-                계획 구간을 기반으로 실제 수업 기록용 구간이 생성됩니다
-              </div>
-            </div>
-
-            {/* Actual Blocks Section */}
-            {actualGenerated && actualBlocks.length > 0 && (
-              <>
-                <div className="section-divider">
-                  <span>🎯 실제 수업 회고</span>
-                </div>
-
-                {actualBlocks.map((block, index) => (
-                  <ActualBlockAccordion
-                    key={block.id}
-                    block={block}
-                    index={index}
-                    cumulativeActualMinutes={actualCumulativeMinutes[index]}
-                    classTimeStart={classTimeStart}
-                    totalTimeLimit={totalTimeLimit}
-                    onChange={(updated) => updateActualBlock(index, updated)}
-                  />
-                ))}
-              </>
-            )}
-
             {/* Save button */}
-            <button className="btn-save" onClick={handleSave}>
-              💾 회고 저장하기
-            </button>
+            <div style={{ marginTop: '20px' }}>
+              <button className="btn-save" style={{ width: '100%' }} onClick={handleSave}>
+                💾 저장하기
+              </button>
+            </div>
           </div>
         )}
 
@@ -451,6 +499,7 @@ export default function ReflectionApp() {
           <ReflectionList
             reflections={reflections}
             onDelete={deleteReflection}
+            onLoad={loadReflection}
           />
         )}
       </div>

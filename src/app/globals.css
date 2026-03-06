@@ -350,7 +350,7 @@ select:focus {
 
 .accordion-header.cognitive-break {
     background: #000000;
-    border-left: 5px solid #fbbf24;
+    border-left: 5px solid #000000;
     color: #ffffff;
 }
 
@@ -370,8 +370,13 @@ select:focus {
 }
 
 .accordion-header.cognitive-none {
-    background: #faf5ff;
-    border-left: 4px solid #c4b5fd;
+    background: #F3F4F6;
+    border-left: 4px solid #D1D5DB;
+}
+
+.accordion-header.cognitive-problem {
+    background: #E5E7EB;
+    border-left: 5px solid #9CA3AF;
 }
 
 .accordion-header:hover {
@@ -416,11 +421,8 @@ select:focus {
     border: 2px solid transparent;
     padding: 6px 10px;
     border-radius: 6px;
-    min-width: 200px;
-    max-width: 400px;
-    width: auto;
+    width: 100%;
     transition: all 0.3s;
-    flex-shrink: 1;
     color: #6B7280;
 }
 
@@ -446,11 +448,8 @@ select:focus {
     border: 2px solid transparent;
     padding: 6px 10px;
     border-radius: 6px;
-    min-width: 200px;
-    max-width: 500px;
-    width: auto;
+    width: 100%;
     transition: all 0.3s;
-    flex-shrink: 1;
     color: #6B7280;
 }
 
