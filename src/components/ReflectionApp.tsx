@@ -277,14 +277,20 @@ export default function ReflectionApp() {
   // --- Load reflection into form ---
 
   const loadReflection = useCallback((reflection: Reflection) => {
-    setClassDate(reflection.date);
-    setClassTimeStart(reflection.timeStart);
-    setClassTimeEnd(reflection.timeEnd);
-    setCourseTitle(reflection.courseTitle);
-    setSessionNumber(reflection.sessionNumber);
-    setTotalTimeLimit(reflection.totalTimeLimit);
-    setPlanBlocks(JSON.parse(JSON.stringify(reflection.planBlocks)));
-    const maxId = reflection.planBlocks.reduce((max, b) => Math.max(max, b.id), 0);
+    setClassDate(reflection.date || '');
+    setClassTimeStart(reflection.timeStart || '13:30');
+    setClassTimeEnd(reflection.timeEnd || '17:00');
+    setCourseTitle(reflection.courseTitle || '');
+    setSessionNumber(reflection.sessionNumber || '');
+    setTotalTimeLimit(reflection.totalTimeLimit || 210);
+    // Migrate old data: ensure kicks, isProblem exist on each block
+    const blocks = (reflection.planBlocks || []).map((b) => ({
+      ...b,
+      kicks: b.kicks || [''],
+      isProblem: b.isProblem || false,
+    }));
+    setPlanBlocks(JSON.parse(JSON.stringify(blocks)));
+    const maxId = blocks.reduce((max, b) => Math.max(max, b.id), 0);
     setBlockIdCounter(maxId + 1);
     setEditingReflectionId(reflection.id);
     setActiveView('new');

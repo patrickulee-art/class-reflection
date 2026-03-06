@@ -43,12 +43,14 @@ export default function ReflectionList({
   return (
     <div>
       {reflections.map((reflection) => {
-        const totalPlanned = reflection.planBlocks.reduce(
-          (sum, b) => sum + b.minutes,
+        const blocks = reflection.planBlocks || [];
+        const actuals = reflection.actualBlocks || [];
+        const totalPlanned = blocks.reduce(
+          (sum, b) => sum + (b.minutes || 0),
           0
         );
-        const totalActual = reflection.actualBlocks.reduce(
-          (sum, b) => sum + b.actualMinutes,
+        const totalActual = actuals.reduce(
+          (sum, b) => sum + (b.actualMinutes || 0),
           0
         );
 
@@ -62,7 +64,7 @@ export default function ReflectionList({
               <span className="reflection-title">
                 {reflection.courseTitle || '(제목 없음)'}
                 {reflection.sessionNumber
-                  ? ` - ${reflection.sessionNumber}차시`
+                  ? ` - ${reflection.sessionNumber}`
                   : ''}
               </span>
               <span className="reflection-date">
@@ -70,9 +72,9 @@ export default function ReflectionList({
               </span>
             </div>
             <div className="reflection-stats">
-              <span>📚 구간: {reflection.planBlocks.length}개</span>
+              <span>📚 구간: {blocks.length}개</span>
               <span>⏱️ 계획: {totalPlanned}분</span>
-              {reflection.actualBlocks.length > 0 && (
+              {actuals.length > 0 && (
                 <span>
                   🎯 실제: {totalActual}분 (
                   {totalActual - totalPlanned > 0 ? '+' : ''}
