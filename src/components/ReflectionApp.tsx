@@ -17,6 +17,7 @@ import CognitiveScorePreview from './CognitiveScorePreview';
 import PlanBlockAccordion from './PlanBlockAccordion';
 
 import ReflectionList from './ReflectionList';
+import TensionWarmup from './TensionWarmup';
 import Toast from './Toast';
 
 const DRAFT_KEY = 'reflection_draft_v1';
@@ -78,6 +79,13 @@ export default function ReflectionApp() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // --- Plan block operations ---
+
+  const addBlock = useCallback((factory: (id: number) => PlanBlock) => {
+    setPlanBlocks((prev) => [...prev, factory(blockIdCounter)]);
+    setBlockIdCounter((prev) => prev + 1);
+  }, [blockIdCounter]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -104,7 +112,7 @@ export default function ReflectionApp() {
       // Ctrl+Enter = add block
       if (e.ctrlKey && e.key === 'Enter') {
         e.preventDefault();
-        addNormalBlock();
+        addBlock(createPlanBlock);
         return;
       }
 
@@ -137,29 +145,7 @@ export default function ReflectionApp() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeView, blockIdCounter, hoveredBlockIndex, pushUndo]);
-
-  // --- Plan block operations ---
-
-  const addNormalBlock = useCallback(() => {
-    setPlanBlocks((prev) => [...prev, createPlanBlock(blockIdCounter)]);
-    setBlockIdCounter((prev) => prev + 1);
-  }, [blockIdCounter]);
-
-  const addStoryBlock = useCallback(() => {
-    setPlanBlocks((prev) => [...prev, createStoryBlock(blockIdCounter)]);
-    setBlockIdCounter((prev) => prev + 1);
-  }, [blockIdCounter]);
-
-  const addBreakBlock = useCallback(() => {
-    setPlanBlocks((prev) => [...prev, createBreakBlock(blockIdCounter)]);
-    setBlockIdCounter((prev) => prev + 1);
-  }, [blockIdCounter]);
-
-  const addProblemBlock = useCallback(() => {
-    setPlanBlocks((prev) => [...prev, createProblemBlock(blockIdCounter)]);
-    setBlockIdCounter((prev) => prev + 1);
-  }, [blockIdCounter]);
+  }, [activeView, blockIdCounter, hoveredBlockIndex, pushUndo, addBlock]);
 
   const updatePlanBlock = useCallback((index: number, updated: PlanBlock) => {
     pushUndo();
@@ -258,8 +244,23 @@ export default function ReflectionApp() {
     };
 
     addReflection(reflection);
-    setEditingReflectionId(reflection.id);
     showToast('success', '회고가 저장되었습니다!');
+
+    // Reset form for new reflection
+    const { blocks: newBlocks, nextId } = getDefaultBlocks();
+    setPlanBlocks(newBlocks);
+    setBlockIdCounter(nextId);
+    setEditingReflectionId(null);
+    setCourseTitle('');
+    setSessionNumber('');
+    setUndoHistory([]);
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    setClassDate(`${yyyy}-${mm}-${dd}`);
+    localStorage.removeItem(DRAFT_KEY);
+
     setIsSaving(false);
   }, [
     isSaving,
@@ -423,6 +424,8 @@ export default function ReflectionApp() {
         {/* New Reflection View */}
         {activeView === 'new' && (
           <div>
+            <TensionWarmup />
+
             <BasicInfo
               classDate={classDate}
               classTimeStart={classTimeStart}
@@ -457,7 +460,6 @@ export default function ReflectionApp() {
                 key={block.id}
                 block={block}
                 index={index}
-                totalBlocks={planBlocks.length}
                 cumulativeMinutes={planCumulativeMinutes[index]}
                 classTimeStart={classTimeStart}
                 onChange={(updated) => updatePlanBlock(index, updated)}
@@ -477,16 +479,16 @@ export default function ReflectionApp() {
 
             {/* Add block buttons */}
             <div className="buttons-row">
-              <button className="btn-add-block" onClick={addNormalBlock}>
+              <button className="btn-add-block" onClick={() => addBlock(createPlanBlock)}>
                 수업 구간 추가
               </button>
-              <button className="btn-add-block" onClick={addProblemBlock} style={{ background: '#9CA3AF', color: 'white' }}>
+              <button className="btn-add-block" onClick={() => addBlock(createProblemBlock)} style={{ background: '#9CA3AF', color: 'white' }}>
                 ✏️ 문제 풀이 구간 추가
               </button>
-              <button className="btn-add-story" onClick={addStoryBlock}>
+              <button className="btn-add-story" onClick={() => addBlock(createStoryBlock)}>
                 💬 썰 구간 추가
               </button>
-              <button className="btn-add-break" onClick={addBreakBlock}>
+              <button className="btn-add-break" onClick={() => addBlock(createBreakBlock)}>
                 ⏰ 쉬는시간 추가
               </button>
             </div>

@@ -7,7 +7,6 @@ import StarRating from './StarRating';
 interface PlanBlockAccordionProps {
   block: PlanBlock;
   index: number;
-  totalBlocks: number;
   cumulativeMinutes: number;
   classTimeStart: string;
   onChange: (updated: PlanBlock) => void;
@@ -80,6 +79,7 @@ export default function PlanBlockAccordion({
   const [isOpen, setIsOpen] = useState(false);
   const [evalDropdownOpen, setEvalDropdownOpen] = useState(false);
   const [customEvalInput, setCustomEvalInput] = useState('');
+  const [lastRemovedKick, setLastRemovedKick] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const cognitiveClass = `cognitive-${block.cognitiveLevel}`;
@@ -223,7 +223,7 @@ export default function PlanBlockAccordion({
         <div className="accordion-title-section">
           {/* Cognitive level buttons or spacer for alignment */}
           <div
-            style={{ display: 'flex', flexDirection: 'column', gap: '3px', flexShrink: 0, marginRight: '10px', width: '34px' }}
+            className="cognitive-buttons"
             onClick={(e) => e.stopPropagation()}
           >
             {!block.isStory && !block.isBreak && !block.isProblem ? (
@@ -235,18 +235,9 @@ export default function PlanBlockAccordion({
                 <button
                   key={level}
                   type="button"
+                  className="cognitive-btn"
                   style={{
-                    border: 'none',
                     background: block.cognitiveLevel === level ? 'rgba(255,255,255,0.85)' : 'transparent',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    width: '34px',
-                    height: '34px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '18px',
-                    transition: 'background 0.15s',
                   }}
                   onClick={() => handleCognitiveChange(level)}
                   title={title}
@@ -260,13 +251,10 @@ export default function PlanBlockAccordion({
           </div>
 
           {/* Text inputs - vertical layout */}
-          <div
-            style={{ display: 'flex', flex: 1, minWidth: 0, maxWidth: '720px' }}
-          >
+          <div className="block-text-wrapper">
             {/* Input column - all inputs same width */}
-            <div
-              style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: 0 }}
-            >
+            <div className="block-text-inputs">
+
               <input
                 type="text"
                 className="accordion-title-input"
@@ -325,16 +313,15 @@ export default function PlanBlockAccordion({
                         padding: '0 4px',
                         fontSize: '14px',
                         color: '#9CA3AF',
-                        visibility: block.kicks.length > 1 ? 'visible' : 'hidden',
                       }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        const newKicks = block.kicks.slice(0, -1);
-                        onChange({ ...block, kicks: newKicks });
+                        setLastRemovedKick(null);
+                        onChange({ ...block, kicks: [...block.kicks, lastRemovedKick ?? ''] });
                       }}
-                      title="문제 삭제"
+                      title="문제 추가"
                     >
-                      -
+                      +
                     </button>
                     <button
                       type="button"
@@ -345,14 +332,17 @@ export default function PlanBlockAccordion({
                         padding: '0 4px',
                         fontSize: '14px',
                         color: '#9CA3AF',
+                        visibility: block.kicks.length > 1 ? 'visible' : 'hidden',
                       }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        onChange({ ...block, kicks: [...block.kicks, ''] });
+                        setLastRemovedKick(block.kicks[block.kicks.length - 1]);
+                        const newKicks = block.kicks.slice(0, -1);
+                        onChange({ ...block, kicks: newKicks });
                       }}
-                      title="문제 추가"
+                      title="문제 삭제"
                     >
-                      +
+                      -
                     </button>
                   </div>
                 </div>
@@ -389,16 +379,15 @@ export default function PlanBlockAccordion({
                       padding: '0 4px',
                       fontSize: '14px',
                       color: '#9CA3AF',
-                      visibility: block.kicks.length > 1 ? 'visible' : 'hidden',
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      const newKicks = block.kicks.slice(0, -1);
-                      onChange({ ...block, kicks: newKicks });
+                      setLastRemovedKick(null);
+                      onChange({ ...block, kicks: [...block.kicks, lastRemovedKick ?? ''] });
                     }}
-                    title="킥 삭제"
+                    title="킥 추가"
                   >
-                    -
+                    +
                   </button>
                   <button
                     type="button"
@@ -409,14 +398,17 @@ export default function PlanBlockAccordion({
                       padding: '0 4px',
                       fontSize: '14px',
                       color: '#9CA3AF',
+                      visibility: block.kicks.length > 1 ? 'visible' : 'hidden',
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      onChange({ ...block, kicks: [...block.kicks, ''] });
+                      setLastRemovedKick(block.kicks[block.kicks.length - 1]);
+                      const newKicks = block.kicks.slice(0, -1);
+                      onChange({ ...block, kicks: newKicks });
                     }}
-                    title="킥 추가"
+                    title="킥 삭제"
                   >
-                    +
+                    -
                   </button>
                 </div>
               </div>

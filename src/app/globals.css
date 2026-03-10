@@ -268,6 +268,190 @@ select:focus {
     border-radius: 4px;
 }
 
+/* 텐션 워밍업 */
+.tension-warmup {
+    background: #FFF7ED;
+    border: 1.5px solid #FDBA74;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    color: #1A1A1A;
+    transition: all 0.4s;
+}
+
+.tension-warmup.done {
+    background: #F0FDF4;
+    border-color: #86EFAC;
+}
+
+.tension-header {
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.tension-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.tension-icon {
+    font-size: 24px;
+}
+
+.tension-title {
+    font-size: 16px;
+    font-weight: 700;
+    flex: 1;
+}
+
+.tension-progress-badge {
+    background: #FFEDD5;
+    color: #C2410C;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.tension-warmup.done .tension-progress-badge {
+    background: #DCFCE7;
+    color: #15803D;
+}
+
+.tension-progress-bar {
+    height: 6px;
+    background: #FED7AA;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.tension-warmup.done .tension-progress-bar {
+    background: #BBF7D0;
+}
+
+.tension-progress-fill {
+    height: 100%;
+    background: #F97316;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+
+.tension-warmup.done .tension-progress-fill {
+    background: #22C55E;
+}
+
+.tension-items {
+    padding: 0 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.tension-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: white;
+    border: 1px solid #FED7AA;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tension-item:hover {
+    background: #FFF1E0;
+}
+
+.tension-item.checked {
+    background: #F6F7F8;
+    border-color: #E5E7EB;
+    opacity: 0.55;
+}
+
+.tension-item.checked .tension-item-title,
+.tension-item.checked .tension-item-desc {
+    text-decoration: line-through;
+}
+
+.tension-item input[type="checkbox"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #FDBA74;
+    border-radius: 6px;
+    flex-shrink: 0;
+    cursor: pointer;
+    position: relative;
+    background: transparent;
+    margin: 0;
+}
+
+.tension-item input[type="checkbox"]:checked {
+    background: #F97316;
+    border-color: #F97316;
+}
+
+.tension-item input[type="checkbox"]:checked::after {
+    content: '\2713';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.tension-warmup.done .tension-item input[type="checkbox"]:checked {
+    background: #22C55E;
+    border-color: #22C55E;
+}
+
+.tension-item-emoji {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.tension-item-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.tension-item-title {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.tension-item-desc {
+    font-size: 12px;
+    color: #6B7280;
+    line-height: 1.4;
+}
+
+.tension-item-duration {
+    font-size: 12px;
+    font-weight: 600;
+    color: #9CA3AF;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.tension-tip {
+    text-align: center;
+    font-size: 13px;
+    color: #9CA3AF;
+    padding: 8px 0 4px;
+    font-weight: 500;
+}
+
 /* 아코디언 블록 */
 .accordion-block {
     margin-bottom: 5px;
@@ -397,6 +581,43 @@ select:focus {
     gap: 15px;
     flex: 1;
     flex-wrap: nowrap;
+}
+
+/* Cognitive level buttons container */
+.cognitive-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex-shrink: 0;
+    margin-right: 10px;
+    width: 34px;
+    align-items: center;
+}
+
+.cognitive-btn {
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1;
+    transition: background 0.2s;
+}
+
+/* Block text wrapper - contains inputs + kick buttons */
+.block-text-wrapper {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+}
+
+/* Block text inputs column */
+.block-text-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
 }
 
 .accordion-icon {
@@ -1384,6 +1605,12 @@ select:focus {
     .detail-stat-item:last-child {
         border-bottom: none;
     }
+
+    .reflection-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
 }
 
 @keyframes syncPulse {
@@ -1391,7 +1618,7 @@ select:focus {
     50% { opacity: 0.3; }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     body {
         padding: 10px;
     }
@@ -1405,7 +1632,11 @@ select:focus {
     }
 
     .header h1 {
-        font-size: 22px;
+        font-size: 20px;
+    }
+
+    .header p {
+        font-size: 13px;
     }
 
     .content {
@@ -1420,12 +1651,167 @@ select:focus {
         flex-direction: column;
     }
 
-    .accordion-title-section {
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
     .default-evals {
         grid-template-columns: 1fr;
     }
+
+    .buttons-row {
+        flex-wrap: wrap;
+    }
+
+    .buttons-row .btn-add-block,
+    .buttons-row .btn-add-story,
+    .buttons-row .btn-add-break {
+        width: calc(50% - 5px);
+        margin-left: 0;
+    }
+
+    .accordion-header {
+        padding: 12px 14px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .accordion-header > div:last-child {
+        align-self: flex-end;
+    }
+
+    /* Mobile: stack cognitive buttons horizontally on top, text full width below */
+    .accordion-title-section {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .cognitive-buttons {
+        flex-direction: row;
+        width: auto;
+        margin-right: 0;
+        gap: 8px;
+        justify-content: flex-start;
+    }
+
+    .cognitive-btn {
+        padding: 4px 8px;
+        font-size: 16px;
+    }
+
+    .block-text-wrapper {
+        width: 100%;
+    }
+
+    .block-text-inputs {
+        width: 100%;
+    }
+
+    .accordion-title-input,
+    .accordion-subtitle-input {
+        font-size: 14px;
+        padding: 8px 10px;
+    }
 }
+
+@media (max-width: 480px) {
+    .container {
+        padding: 8px;
+    }
+
+    .header {
+        padding: 15px;
+    }
+
+    .header h1 {
+        font-size: 18px;
+    }
+
+    .content {
+        padding: 12px;
+    }
+
+    .tab {
+        font-size: 13px;
+        padding: 10px 12px;
+    }
+
+    .buttons-row .btn-add-block,
+    .buttons-row .btn-add-story,
+    .buttons-row .btn-add-break {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .btn-save {
+        font-size: 15px;
+        padding: 14px;
+    }
+
+    .time-settings select {
+        width: 100%;
+    }
+
+    .reflection-card {
+        padding: 14px;
+    }
+
+    .reflection-stats {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .accordion-header {
+        padding: 10px 12px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .accordion-title-section {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .cognitive-buttons {
+        flex-direction: row;
+        width: auto;
+        margin-right: 0;
+    }
+
+    .accordion-title-input {
+        font-size: 14px;
+    }
+
+    .accordion-subtitle-input {
+        font-size: 13px;
+    }
+
+    .time-input {
+        width: 55px;
+    }
+
+    .time-range-display {
+        font-size: 11px;
+    }
+
+    .default-eval-item {
+        flex-direction: column;
+    }
+
+    .memo-textarea {
+        min-height: 60px;
+    }
+
+    .toast {
+        left: 10px;
+        right: 10px;
+        transform: none;
+        max-width: unset;
+    }
+
+    .toast.show {
+        transform: translateY(0);
+    }
+}
+
