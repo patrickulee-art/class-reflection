@@ -251,6 +251,18 @@ export default function ReflectionDetailPage() {
         </div>
       )}
 
+      {/* Prep Tools */}
+      {reflection.prepTools && reflection.prepTools.length > 0 && reflection.prepTools.some((t: string) => t.trim() !== '') && (
+        <div className="detail-section">
+          <h3 className="detail-section-title">수업 준비 도구</h3>
+          <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            {reflection.prepTools.filter((t: string) => t.trim() !== '').map((tool: string, i: number) => (
+              <li key={i} style={{ fontSize: '15px', color: '#374151' }}>{tool}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* Cognitive Load Visualization */}
       {reflection.planBlocks && reflection.planBlocks.length > 0 && (
         <div className="detail-section">

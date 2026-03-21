@@ -18,6 +18,7 @@ import CognitiveScorePreview from '@/components/CognitiveScorePreview';
 import PlanBlockAccordion from '@/components/PlanBlockAccordion';
 import LessonGoalSection from '@/components/LessonGoalSection';
 import TensionWarmup from '@/components/TensionWarmup';
+import ClassPrepTools from '@/components/ClassPrepTools';
 import Toast from '@/components/Toast';
 
 const DRAFT_KEY = 'reflection_draft_v1';
@@ -53,6 +54,7 @@ function WritePageContent() {
   const [sessionNumber, setSessionNumber] = useState('');
   const [lessonGoal, setLessonGoal] = useState('');
   const [motivatingSpeech, setMotivatingSpeech] = useState('');
+  const [prepTools, setPrepTools] = useState<string[]>(['']);
   const [totalTimeLimit, setTotalTimeLimit] = useState(210);
 
   // Block state
@@ -118,6 +120,7 @@ function WritePageContent() {
         setSessionNumber(reflection.sessionNumber || '');
         setLessonGoal(reflection.lessonGoal || '');
         setMotivatingSpeech(reflection.motivatingSpeech || '');
+        setPrepTools(reflection.prepTools && reflection.prepTools.length > 0 ? reflection.prepTools : ['']);
         setTotalTimeLimit(reflection.totalTimeLimit || 210);
         const blocks = (reflection.planBlocks || []).map((b) => ({
           ...b,
@@ -146,6 +149,7 @@ function WritePageContent() {
           setSessionNumber(draft.sessionNumber || '');
           setLessonGoal(draft.lessonGoal || '');
           setMotivatingSpeech(draft.motivatingSpeech || '');
+          setPrepTools(draft.prepTools && draft.prepTools.length > 0 ? draft.prepTools : ['']);
           setTotalTimeLimit(draft.totalTimeLimit || 210);
           setPlanBlocks(draft.planBlocks);
           setBlockIdCounter(draft.blockIdCounter || 1);
@@ -183,6 +187,7 @@ function WritePageContent() {
         sessionNumber,
         lessonGoal,
         motivatingSpeech,
+        prepTools,
         totalTimeLimit,
         planBlocks,
         blockIdCounter,
@@ -191,7 +196,7 @@ function WritePageContent() {
       localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
     }, 500);
     return () => clearTimeout(timer);
-  }, [draftLoaded, classDate, classTimeStart, classTimeEnd, courseTitle, sessionNumber, lessonGoal, motivatingSpeech, totalTimeLimit, planBlocks, blockIdCounter, editingReflectionId]);
+  }, [draftLoaded, classDate, classTimeStart, classTimeEnd, courseTitle, sessionNumber, lessonGoal, motivatingSpeech, prepTools, totalTimeLimit, planBlocks, blockIdCounter, editingReflectionId]);
 
   // Plan block operations
   const addBlock = useCallback((factory: (id: number) => PlanBlock) => {
@@ -340,6 +345,7 @@ function WritePageContent() {
       sessionNumber,
       lessonGoal,
       motivatingSpeech,
+      prepTools: prepTools.filter((t) => t.trim() !== ''),
       totalTimeLimit,
       totalPlannedMinutes,
       totalActualMinutes: 0,
@@ -368,6 +374,7 @@ function WritePageContent() {
     sessionNumber,
     lessonGoal,
     motivatingSpeech,
+    prepTools,
     totalTimeLimit,
     editingReflectionId,
     addReflection,
@@ -397,6 +404,11 @@ function WritePageContent() {
         />
 
         <TensionWarmup />
+
+        <ClassPrepTools
+          items={prepTools}
+          onChange={setPrepTools}
+        />
 
         <BasicInfo
           classDate={classDate}

@@ -237,6 +237,7 @@ export default function ReflectionApp() {
       sessionNumber,
       lessonGoal: '',
       motivatingSpeech: '',
+      prepTools: [],
       totalTimeLimit,
       totalPlannedMinutes,
       totalActualMinutes: 0,

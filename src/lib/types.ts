@@ -60,6 +60,7 @@ export interface Reflection {
   sessionNumber: string;
   lessonGoal: string;
   motivatingSpeech: string;
+  prepTools: string[];
   totalTimeLimit: number;
   totalPlannedMinutes: number;
   totalActualMinutes: number;

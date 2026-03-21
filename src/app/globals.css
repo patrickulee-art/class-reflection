@@ -503,6 +503,190 @@ select:focus {
     font-weight: 500;
 }
 
+/* 수업 준비 도구 */
+.prep-tools {
+    background: #F5F3FF;
+    border: 1.5px solid #C4B5FD;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    color: #1A1A1A;
+    transition: all 0.4s;
+}
+
+.prep-tools.done {
+    background: #F0FDF4;
+    border-color: #86EFAC;
+}
+
+.prep-tools-header {
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.prep-tools-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.prep-tools-icon {
+    font-size: 24px;
+}
+
+.prep-tools-title {
+    font-size: 16px;
+    font-weight: 700;
+    flex: 1;
+}
+
+.prep-tools-badge {
+    background: #EDE9FE;
+    color: #7C3AED;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.prep-tools.done .prep-tools-badge {
+    background: #DCFCE7;
+    color: #15803D;
+}
+
+.prep-tools-chevron {
+    color: #9CA3AF;
+    font-size: 14px;
+}
+
+.prep-tools-progress-bar {
+    height: 6px;
+    background: #DDD6FE;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.prep-tools.done .prep-tools-progress-bar {
+    background: #BBF7D0;
+}
+
+.prep-tools-progress-fill {
+    height: 100%;
+    background: #8B5CF6;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+
+.prep-tools.done .prep-tools-progress-fill {
+    background: #22C55E;
+}
+
+.prep-tools-items {
+    padding: 0 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.prep-tools-desc {
+    font-size: 13px;
+    color: #9CA3AF;
+    margin-bottom: 4px;
+}
+
+.prep-tools-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.prep-tools-checkbox {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #C4B5FD;
+    border-radius: 6px;
+    flex-shrink: 0;
+    cursor: pointer;
+    position: relative;
+    background: transparent;
+    margin: 0;
+}
+
+.prep-tools-checkbox:checked {
+    background: #8B5CF6;
+    border-color: #8B5CF6;
+}
+
+.prep-tools-checkbox:checked::after {
+    content: '\2713';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.prep-tools-checkbox:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.prep-tools-input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1.5px solid #DDD6FE;
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    background: white;
+    transition: border-color 0.2s;
+}
+
+.prep-tools-input:focus {
+    border-color: #8B5CF6;
+}
+
+.prep-tools-remove-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #D1D5DB;
+    border-radius: 6px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.prep-tools-remove-btn:hover {
+    color: #EF4444;
+    background: #FEE2E2;
+}
+
+.prep-tools-add-btn {
+    border: 1.5px dashed #C4B5FD;
+    background: transparent;
+    cursor: pointer;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #8B5CF6;
+    border-radius: 10px;
+    transition: all 0.2s;
+    margin-top: 4px;
+}
+
+.prep-tools-add-btn:hover {
+    background: #EDE9FE;
+}
+
 /* 아코디언 블록 */
 .accordion-block {
     margin-bottom: 5px;
