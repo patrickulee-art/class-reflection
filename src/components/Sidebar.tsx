@@ -75,7 +75,7 @@ export default function Sidebar({ isOpen, onClose, onToggle }: SidebarProps) {
       )}
       <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-header">
-          <span className="sidebar-logo">수업 설계/회고</span>
+          <a href="/" className="sidebar-logo" style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>이영수의 수업설계</a>
           <button
             className="sidebar-toggle-btn"
             onClick={onToggle}
