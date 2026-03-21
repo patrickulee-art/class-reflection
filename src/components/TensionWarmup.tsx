@@ -57,7 +57,7 @@ function getTodayKey(): string {
 
 export default function TensionWarmup() {
   const [checked, setChecked] = useState<Set<string>>(new Set());
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [loaded, setLoaded] = useState(false);
 
   // Load saved state (daily reset)

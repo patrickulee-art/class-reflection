@@ -34,6 +34,24 @@ export default function BasicInfo({
     <div className="basic-info">
       <div className="basic-info-grid">
         <div className="form-group">
+          <label>강좌명</label>
+          <input
+            type="text"
+            value={courseTitle}
+            onChange={(e) => onCourseTitleChange(e.target.value)}
+            placeholder=""
+          />
+        </div>
+        <div className="form-group">
+          <label>차시</label>
+          <input
+            type="text"
+            value={sessionNumber}
+            onChange={(e) => onSessionNumberChange(e.target.value)}
+            placeholder=""
+          />
+        </div>
+        <div className="form-group">
           <label>수업 날짜</label>
           <input
             type="date"
@@ -75,24 +93,6 @@ export default function BasicInfo({
               </button>
             ))}
           </div>
-        </div>
-        <div className="form-group">
-          <label>강좌명</label>
-          <input
-            type="text"
-            value={courseTitle}
-            onChange={(e) => onCourseTitleChange(e.target.value)}
-            placeholder=""
-          />
-        </div>
-        <div className="form-group">
-          <label>차시</label>
-          <input
-            type="text"
-            value={sessionNumber}
-            onChange={(e) => onSessionNumberChange(e.target.value)}
-            placeholder=""
-          />
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { DM_Sans, Bricolage_Grotesque } from 'next/font/google';
 import './globals.css';
+import ClientLayout from './ClientLayout';
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -35,7 +36,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko" className={`${dmSans.variable} ${bricolage.variable}`}>
-      <body>{children}</body>
+      <body>
+        <ClientLayout>{children}</ClientLayout>
+      </body>
     </html>
   );
 }
