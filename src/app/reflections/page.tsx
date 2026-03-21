@@ -78,7 +78,7 @@ export default function ReflectionsPage() {
               <div
                 key={reflection.id}
                 className="reflection-card"
-                onClick={() => handleEdit(reflection)}
+                onClick={() => router.push(`/reflections/${reflection.id}`)}
               >
                 <div className="reflection-header">
                   <span className="reflection-title">

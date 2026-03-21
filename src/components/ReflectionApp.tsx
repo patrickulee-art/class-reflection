@@ -235,6 +235,8 @@ export default function ReflectionApp() {
       timeEnd: classTimeEnd,
       courseTitle,
       sessionNumber,
+      lessonGoal: '',
+      motivatingSpeech: '',
       totalTimeLimit,
       totalPlannedMinutes,
       totalActualMinutes: 0,

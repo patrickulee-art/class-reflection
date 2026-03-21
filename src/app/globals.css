@@ -269,6 +269,56 @@ select:focus {
     border-radius: 4px;
 }
 
+/* 수업 방향 (Lesson Goal Section) */
+.lesson-goal-section {
+    background: #EFF6FF;
+    border: 1.5px solid #93C5FD;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    padding: 20px;
+    transition: all 0.3s;
+}
+
+.lesson-goal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.lesson-goal-icon {
+    font-size: 24px;
+}
+
+.lesson-goal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1E40AF;
+}
+
+.lesson-goal-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.lesson-goal-textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 60px;
+    transition: border-color 0.3s;
+}
+
+.lesson-goal-textarea:focus {
+    outline: none;
+    border-color: #3B82F6;
+}
+
 /* 텐션 워밍업 */
 .tension-warmup {
     background: #FFF7ED;
@@ -1535,6 +1585,165 @@ select:focus {
 .detail-delete-btn:hover {
     background: #FEE2E2;
     border-color: #FCA5A5;
+}
+
+/* Detail Page (read-only reflection view) */
+.detail-page {
+    padding: 24px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.detail-page-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 12px;
+}
+
+.detail-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #6366F1;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.detail-edit-btn:hover {
+    background: #4F46E5;
+}
+
+.detail-goal-card {
+    background: #FFFBEB;
+    border: 1.5px solid #FDE68A;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.detail-goal-item {
+    margin-bottom: 16px;
+}
+
+.detail-goal-item:last-child {
+    margin-bottom: 0;
+}
+
+.detail-goal-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #92400E;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-goal-text {
+    font-size: 15px;
+    color: #1A1A1A;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.detail-kicks {
+    margin-top: 12px;
+    padding: 12px 16px;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid #E5E7EB;
+}
+
+.detail-kicks-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.detail-kicks-list li {
+    font-size: 14px;
+    color: #1A1A1A;
+    padding-left: 16px;
+    position: relative;
+    line-height: 1.5;
+}
+
+.detail-kicks-list li::before {
+    content: '\2022';
+    position: absolute;
+    left: 0;
+    color: #6366F1;
+    font-weight: 700;
+}
+
+.detail-not-found {
+    text-align: center;
+    padding: 80px 20px;
+}
+
+.detail-not-found-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: #D1D5DB;
+}
+
+.detail-not-found-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1A1A1A;
+    margin-bottom: 8px;
+}
+
+.detail-not-found-desc {
+    font-size: 15px;
+    color: #9CA3AF;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+    .detail-page {
+        padding: 16px;
+    }
+
+    .detail-page-nav {
+        flex-wrap: wrap;
+    }
+
+    .detail-back-btn,
+    .detail-edit-btn {
+        font-size: 14px;
+        padding: 10px 18px;
+    }
+
+    .detail-goal-card {
+        padding: 16px;
+    }
+
+    .detail-evals {
+        flex-direction: column;
+    }
+
+    .detail-eval-item {
+        min-width: unset;
+        width: 100%;
+    }
+
+    .detail-block-header {
+        flex-direction: column;
+    }
 }
 
 /* Toast */

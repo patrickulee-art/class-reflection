@@ -58,6 +58,8 @@ export interface Reflection {
   timeEnd: string;
   courseTitle: string;
   sessionNumber: string;
+  lessonGoal: string;
+  motivatingSpeech: string;
   totalTimeLimit: number;
   totalPlannedMinutes: number;
   totalActualMinutes: number;

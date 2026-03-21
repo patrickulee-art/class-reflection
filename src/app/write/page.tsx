@@ -16,6 +16,7 @@ import BasicInfo from '@/components/BasicInfo';
 import TimeSettings from '@/components/TimeSettings';
 import CognitiveScorePreview from '@/components/CognitiveScorePreview';
 import PlanBlockAccordion from '@/components/PlanBlockAccordion';
+import LessonGoalSection from '@/components/LessonGoalSection';
 import TensionWarmup from '@/components/TensionWarmup';
 import Toast from '@/components/Toast';
 
@@ -40,6 +41,8 @@ export default function WritePage() {
   const [classTimeEnd, setClassTimeEnd] = useState('17:00');
   const [courseTitle, setCourseTitle] = useState('');
   const [sessionNumber, setSessionNumber] = useState('');
+  const [lessonGoal, setLessonGoal] = useState('');
+  const [motivatingSpeech, setMotivatingSpeech] = useState('');
   const [totalTimeLimit, setTotalTimeLimit] = useState(210);
 
   // Block state
@@ -87,6 +90,8 @@ export default function WritePage() {
         setClassTimeEnd(reflection.timeEnd || '17:00');
         setCourseTitle(reflection.courseTitle || '');
         setSessionNumber(reflection.sessionNumber || '');
+        setLessonGoal(reflection.lessonGoal || '');
+        setMotivatingSpeech(reflection.motivatingSpeech || '');
         setTotalTimeLimit(reflection.totalTimeLimit || 210);
         const blocks = (reflection.planBlocks || []).map((b) => ({
           ...b,
@@ -113,6 +118,8 @@ export default function WritePage() {
           setClassTimeEnd(draft.classTimeEnd || '17:00');
           setCourseTitle(draft.courseTitle || '');
           setSessionNumber(draft.sessionNumber || '');
+          setLessonGoal(draft.lessonGoal || '');
+          setMotivatingSpeech(draft.motivatingSpeech || '');
           setTotalTimeLimit(draft.totalTimeLimit || 210);
           setPlanBlocks(draft.planBlocks);
           setBlockIdCounter(draft.blockIdCounter || 1);
@@ -148,6 +155,8 @@ export default function WritePage() {
         classTimeEnd,
         courseTitle,
         sessionNumber,
+        lessonGoal,
+        motivatingSpeech,
         totalTimeLimit,
         planBlocks,
         blockIdCounter,
@@ -156,7 +165,7 @@ export default function WritePage() {
       localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
     }, 500);
     return () => clearTimeout(timer);
-  }, [draftLoaded, classDate, classTimeStart, classTimeEnd, courseTitle, sessionNumber, totalTimeLimit, planBlocks, blockIdCounter, editingReflectionId]);
+  }, [draftLoaded, classDate, classTimeStart, classTimeEnd, courseTitle, sessionNumber, lessonGoal, motivatingSpeech, totalTimeLimit, planBlocks, blockIdCounter, editingReflectionId]);
 
   // Plan block operations
   const addBlock = useCallback((factory: (id: number) => PlanBlock) => {
@@ -303,6 +312,8 @@ export default function WritePage() {
       timeEnd: classTimeEnd,
       courseTitle,
       sessionNumber,
+      lessonGoal,
+      motivatingSpeech,
       totalTimeLimit,
       totalPlannedMinutes,
       totalActualMinutes: 0,
@@ -329,6 +340,8 @@ export default function WritePage() {
     classTimeEnd,
     courseTitle,
     sessionNumber,
+    lessonGoal,
+    motivatingSpeech,
     totalTimeLimit,
     editingReflectionId,
     addReflection,
@@ -350,6 +363,13 @@ export default function WritePage() {
       </div>
 
       <div className="content">
+        <LessonGoalSection
+          lessonGoal={lessonGoal}
+          motivatingSpeech={motivatingSpeech}
+          onLessonGoalChange={setLessonGoal}
+          onMotivatingSpeechChange={setMotivatingSpeech}
+        />
+
         <TensionWarmup />
 
         <BasicInfo
