@@ -403,12 +403,12 @@ function WritePageContent() {
           onMotivatingSpeechChange={setMotivatingSpeech}
         />
 
-        <TensionWarmup />
-
         <ClassPrepTools
           items={prepTools}
           onChange={setPrepTools}
         />
+
+        <TensionWarmup />
 
         <BasicInfo
           classDate={classDate}
