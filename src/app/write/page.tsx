@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   PlanBlock,
   Reflection,
@@ -31,7 +31,17 @@ function getDefaultBlocks(): { blocks: PlanBlock[]; nextId: number } {
 }
 
 export default function WritePage() {
+  return (
+    <Suspense fallback={<div className="write-page"><div className="page-header"><h2>로딩 중...</h2></div></div>}>
+      <WritePageContent />
+    </Suspense>
+  );
+}
+
+function WritePageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isNewMode = searchParams.get('new') === 'true';
   const { reflections, addReflection } = useReflectionsContext();
   const { toast, showToast } = useToast();
 
@@ -71,6 +81,22 @@ export default function WritePage() {
   // Initialize: check for edit mode (depends on reflections being loaded)
   useEffect(() => {
     if (draftLoaded) return; // Already initialized
+
+    // New mode: skip draft and edit restoration, start fresh
+    if (isNewMode) {
+      localStorage.removeItem(DRAFT_KEY);
+      localStorage.removeItem(EDIT_REFLECTION_KEY);
+      const { blocks, nextId } = getDefaultBlocks();
+      setPlanBlocks(blocks);
+      setBlockIdCounter(nextId);
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      setClassDate(`${yyyy}-${mm}-${dd}`);
+      setDraftLoaded(true);
+      return;
+    }
 
     const editId = localStorage.getItem(EDIT_REFLECTION_KEY);
 
@@ -143,7 +169,7 @@ export default function WritePage() {
     const dd = String(today.getDate()).padStart(2, '0');
     setClassDate(`${yyyy}-${mm}-${dd}`);
     setDraftLoaded(true);
-  }, [reflections, draftLoaded, editAttempted]);
+  }, [reflections, draftLoaded, editAttempted, isNewMode]);
 
   // Auto-save draft whenever form state changes
   useEffect(() => {

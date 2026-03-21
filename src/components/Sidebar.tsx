@@ -105,7 +105,7 @@ export default function Sidebar({ isOpen, onClose, onToggle }: SidebarProps) {
           </Link>
 
           <Link
-            href="/write"
+            href="/write?new=true"
             className="sidebar-menu-item sidebar-menu-item-new"
 
           >

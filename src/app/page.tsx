@@ -68,7 +68,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <Link href="/write" className="dashboard-cta">
+      <Link href="/write?new=true" className="dashboard-cta">
         새 수업 회고 작성하기
       </Link>
 
