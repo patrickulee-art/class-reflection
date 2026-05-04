@@ -247,7 +247,7 @@ export default function ReflectionApp() {
     };
 
     addReflection(reflection);
-    showToast('success', '회고가 저장되었습니다!');
+    showToast('success', '설계가 저장되었습니다!');
 
     // Reset form for new reflection
     const { blocks: newBlocks, nextId } = getDefaultBlocks();
@@ -361,7 +361,7 @@ export default function ReflectionApp() {
     <div className="container">
       <div className="header">
         <h1>Teaching Design / Reflection System</h1>
-        <p>수업 설계와 회고를 체계적으로 관리하세요 v13.0</p>
+        <p>수업 설계를 체계적으로 관리하세요 v13.0</p>
       </div>
 
       <div className="tabs" style={{ position: 'relative' }}>
@@ -369,13 +369,13 @@ export default function ReflectionApp() {
           className={`tab ${activeView === 'new' ? 'active' : ''}`}
           onClick={() => setActiveView('new')}
         >
-          새 회고 작성
+          새 설계 작성
         </button>
         <button
           className={`tab ${activeView === 'list' ? 'active' : ''}`}
           onClick={() => setActiveView('list')}
         >
-          회고 목록 ({reflections.length})
+          설계 목록 ({reflections.length})
         </button>
         <div
           style={{

@@ -173,9 +173,9 @@ export default function ReflectionDetailPage() {
       <div className="detail-page">
         <div className="detail-not-found">
           <p className="detail-not-found-icon">{'?'}</p>
-          <p className="detail-not-found-title">회고를 찾을 수 없습니다</p>
+          <p className="detail-not-found-title">설계를 찾을 수 없습니다</p>
           <p className="detail-not-found-desc">
-            존재하지 않거나 삭제된 회고입니다.
+            존재하지 않거나 삭제된 설계입니다.
           </p>
           <button
             className="detail-back-btn"

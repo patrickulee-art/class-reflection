@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useReflectionsContext } from '@/contexts/ReflectionsContext';
@@ -37,6 +37,25 @@ export default function Sidebar({ isOpen, onClose, onToggle }: SidebarProps) {
   const { reflections } = useReflectionsContext();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+
+  const handleNewReflection = useCallback((e: React.MouseEvent) => {
+    const draft = localStorage.getItem('reflection_draft_v1');
+    if (draft) {
+      try {
+        const parsed = JSON.parse(draft);
+        const hasContent = parsed.courseTitle || parsed.lessonGoal || parsed.motivatingSpeech ||
+          (parsed.planBlocks && parsed.planBlocks.length > 1);
+        if (hasContent) {
+          e.preventDefault();
+          if (window.confirm('작성 중인 설계가 있습니다. 새로 작성하시겠습니까?\n(기존 임시저장 내용은 삭제됩니다)')) {
+            router.push('/write?new=true');
+          }
+          return;
+        }
+      } catch { /* ignore */ }
+    }
+  }, [router]);
 
   const sortedReflections = useMemo(() => {
     return [...reflections].sort((a, b) => {
@@ -107,10 +126,10 @@ export default function Sidebar({ isOpen, onClose, onToggle }: SidebarProps) {
           <Link
             href="/write?new=true"
             className="sidebar-menu-item sidebar-menu-item-new"
-
+            onClick={handleNewReflection}
           >
             <span className="sidebar-menu-icon">+</span>
-            <span>새 회고 작성</span>
+            <span>새 설계 작성</span>
           </Link>
 
           <Link
@@ -126,7 +145,7 @@ export default function Sidebar({ isOpen, onClose, onToggle }: SidebarProps) {
                 <line x1="16" y1="17" x2="8" y2="17" />
               </svg>
             </span>
-            <span>저장된 회고</span>
+            <span>저장된 설계</span>
           </Link>
 
           <button
@@ -180,11 +199,11 @@ export default function Sidebar({ isOpen, onClose, onToggle }: SidebarProps) {
         </nav>
 
         <div className="sidebar-recents">
-          <div className="sidebar-recents-title">최근 회고</div>
+          <div className="sidebar-recents-title">최근 설계</div>
           <div className="sidebar-recents-list">
             {filteredReflections.length === 0 ? (
               <div className="sidebar-recents-empty">
-                {searchQuery ? '검색 결과가 없습니다' : '저장된 회고가 없습니다'}
+                {searchQuery ? '검색 결과가 없습니다' : '저장된 설계가 없습니다'}
               </div>
             ) : (
               filteredReflections.map((r) => (
@@ -203,6 +222,32 @@ export default function Sidebar({ isOpen, onClose, onToggle }: SidebarProps) {
               ))
             )}
           </div>
+        </div>
+
+        <div className="sidebar-shortcuts-wrapper">
+          <button
+            className="sidebar-shortcuts-btn"
+            onClick={() => setShortcutsOpen(!shortcutsOpen)}
+            aria-label="단축키 안내"
+            title="단축키 안내"
+          >
+            ?
+          </button>
+          {shortcutsOpen && (
+            <div className="sidebar-shortcuts-popover">
+              <div className="sidebar-shortcuts-title">단축키 안내</div>
+              <div className="sidebar-shortcuts-section">작성 페이지</div>
+              <ul className="sidebar-shortcuts-list">
+                <li><kbd>Cmd/Ctrl</kbd> + <kbd>Z</kbd> <span>되돌리기</span></li>
+                <li><kbd>Ctrl</kbd> + <kbd>Enter</kbd> <span>구간 추가</span></li>
+              </ul>
+              <div className="sidebar-shortcuts-section">블록 위에 마우스를 올린 상태</div>
+              <ul className="sidebar-shortcuts-list">
+                <li><kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> <span>인지 수준 하/중/상</span></li>
+                <li><kbd>Shift</kbd> + <kbd>Del</kbd> <span>블록 삭제</span></li>
+              </ul>
+            </div>
+          )}
         </div>
       </aside>
     </>

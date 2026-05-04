@@ -114,7 +114,7 @@ export default function SettingsPage() {
         <div className="settings-section">
           <h3 className="settings-section-title">데이터 내보내기</h3>
           <p className="settings-description">
-            모든 회고 데이터를 JSON 파일로 내보냅니다. (현재 {reflections.length}개)
+            모든 설계 데이터를 JSON 파일로 내보냅니다. (현재 {reflections.length}개)
           </p>
           <button className="settings-btn" onClick={handleExport}>
             JSON 내보내기

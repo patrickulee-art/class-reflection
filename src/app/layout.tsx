@@ -25,8 +25,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: '수업 설계/회고 시스템 v13.0',
-  description: '수업 설계와 회고를 체계적으로 관리하세요',
+  title: '수업 설계 시스템 v13.0',
+  description: '수업 설계를 체계적으로 관리하세요',
 };
 
 export default function RootLayout({

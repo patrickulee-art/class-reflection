@@ -175,6 +175,19 @@ function WritePageContent() {
     setDraftLoaded(true);
   }, [reflections, draftLoaded, editAttempted, isNewMode]);
 
+  // Warn before browser close/refresh if there's unsaved content
+  useEffect(() => {
+    if (!draftLoaded) return;
+    const hasContent = courseTitle || lessonGoal || motivatingSpeech || planBlocks.length > 1;
+    if (!hasContent) return;
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [draftLoaded, courseTitle, lessonGoal, motivatingSpeech, planBlocks.length]);
+
   // Auto-save draft whenever form state changes
   useEffect(() => {
     if (!draftLoaded) return;
@@ -356,7 +369,7 @@ function WritePageContent() {
 
     addReflection(reflection);
     localStorage.removeItem(DRAFT_KEY);
-    showToast('success', '회고가 저장되었습니다!');
+    showToast('success', '설계가 저장되었습니다!');
 
     // Navigate to reflections list after short delay for toast visibility
     setTimeout(() => {
@@ -392,7 +405,7 @@ function WritePageContent() {
   return (
     <div className="write-page">
       <div className="page-header">
-        <h2>{editingReflectionId ? '회고 편집' : '새 회고 작성'}</h2>
+        <h2>{editingReflectionId ? '설계 편집' : '새 설계 작성'}</h2>
       </div>
 
       <div className="content">

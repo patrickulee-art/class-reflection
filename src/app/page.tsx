@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useReflectionsContext } from '@/contexts/ReflectionsContext';
 import { Reflection } from '@/lib/types';
 
@@ -19,9 +20,19 @@ function formatDate(dateStr: string): string {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const { reflections, isSyncing, isOnline, syncWithSupabase } = useReflectionsContext();
   const [hasDraft, setHasDraft] = useState(false);
   const [todayStr, setTodayStr] = useState('');
+
+  const handleNewReflection = useCallback((e: React.MouseEvent) => {
+    if (hasDraft) {
+      e.preventDefault();
+      if (window.confirm('작성 중인 설계가 있습니다. 새로 작성하시겠습니까?\n(기존 임시저장 내용은 삭제됩니다)')) {
+        router.push('/write?new=true');
+      }
+    }
+  }, [hasDraft, router]);
 
   useEffect(() => {
     const draft = localStorage.getItem(DRAFT_KEY);
@@ -51,7 +62,7 @@ export default function DashboardPage() {
     <div className="dashboard-page">
       <div className="dashboard-header">
         <h1>Teaching Design / Reflection</h1>
-        <p>수업 설계와 회고를 체계적으로 관리하세요 v13.0</p>
+        <p>수업 설계를 체계적으로 관리하세요 v13.0</p>
         <div
           className="sync-indicator"
           onClick={() => { if (!isSyncing) syncWithSupabase(); }}
@@ -68,15 +79,15 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <Link href="/write?new=true" className="dashboard-cta">
-        새 수업 회고 작성하기
+      <Link href="/write?new=true" className="dashboard-cta" onClick={handleNewReflection}>
+        새 수업 설계 작성하기
       </Link>
 
       {hasDraft && (
         <Link href="/write" className="dashboard-draft-alert">
           <span className="draft-alert-icon">{'📝'}</span>
           <div className="draft-alert-text">
-            <strong>작성 중인 회고가 있습니다</strong>
+            <strong>작성 중인 설계가 있습니다</strong>
             <span>이어서 작성하려면 탭하세요</span>
           </div>
           <span className="draft-alert-arrow">{'→'}</span>
@@ -84,11 +95,11 @@ export default function DashboardPage() {
       )}
 
       <div className="dashboard-card">
-        <div className="dashboard-card-title">오늘의 회고</div>
+        <div className="dashboard-card-title">오늘의 설계</div>
         <div className="dashboard-today-info">
           <span className="dashboard-today-date">{todayDisplay}</span>
           <span className="dashboard-today-count">
-            {todayReflections.length}개의 회고
+            {todayReflections.length}개의 설계
           </span>
         </div>
       </div>
@@ -97,7 +108,7 @@ export default function DashboardPage() {
         <div className="dashboard-card-title">전체 통계</div>
         <div className="dashboard-today-info">
           <span className="dashboard-today-count">
-            총 {reflections.length}개의 회고가 저장되어 있습니다
+            총 {reflections.length}개의 설계가 저장되어 있습니다
           </span>
         </div>
       </div>

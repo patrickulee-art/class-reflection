@@ -52,7 +52,7 @@ export default function ReflectionsPage() {
   }, [router]);
 
   const handleDelete = useCallback((id: number) => {
-    if (window.confirm('이 회고를 삭제하시겠습니까?')) {
+    if (window.confirm('이 설계를 삭제하시겠습니까?')) {
       deleteReflection(id);
     }
   }, [deleteReflection]);
@@ -60,7 +60,7 @@ export default function ReflectionsPage() {
   return (
     <div className="reflections-page">
       <div className="page-header">
-        <h2>회고 목록 ({reflections.length})</h2>
+        <h2>설계 목록 ({reflections.length})</h2>
       </div>
 
       <div className="content">
@@ -68,9 +68,9 @@ export default function ReflectionsPage() {
           <div className="empty-state">
             <p style={{ fontSize: '48px', marginBottom: '15px' }}>{'📝'}</p>
             <p style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>
-              저장된 회고가 없습니다
+              저장된 설계가 없습니다
             </p>
-            <p>새 회고 작성 탭에서 수업 회고를 작성해보세요.</p>
+            <p>새 설계 작성에서 수업 설계를 작성해보세요.</p>
           </div>
         ) : (
           <div>
