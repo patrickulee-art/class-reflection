@@ -215,7 +215,7 @@ export default function ReflectionDetailPage() {
       {/* Course title and meta */}
       <div className="detail-header-card">
         <div className="detail-course-title">
-          {reflection.courseTitle || '(제목 없음)'}
+          {reflection.lessonGoal || reflection.courseTitle || '(제목 없음)'}
           {reflection.sessionNumber
             ? ` - ${reflection.sessionNumber}`
             : ''}

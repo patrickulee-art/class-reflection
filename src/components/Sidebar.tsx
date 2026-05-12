@@ -77,8 +77,8 @@ export default function Sidebar({ isOpen, onClose, onToggle }: SidebarProps) {
   }, [sortedReflections, searchQuery]);
 
   const handleRecentClick = (reflection: Reflection) => {
-    localStorage.setItem('view_reflection_id', String(reflection.id));
-    router.push('/reflections');
+    localStorage.setItem('edit_reflection_id', String(reflection.id));
+    router.push('/write');
   };
 
   const handleSearchToggle = () => {
@@ -246,6 +246,10 @@ export default function Sidebar({ isOpen, onClose, onToggle }: SidebarProps) {
               <ul className="sidebar-shortcuts-list">
                 <li><kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> <span>인지 수준 하/중/상</span></li>
                 <li><kbd>Shift</kbd> + <kbd>Del</kbd> <span>블록 삭제</span></li>
+              </ul>
+              <div className="sidebar-shortcuts-section">킥 입력 중</div>
+              <ul className="sidebar-shortcuts-list">
+                <li><kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>↑↓</kbd> <span>킥 순서 이동</span></li>
               </ul>
             </div>
           )}

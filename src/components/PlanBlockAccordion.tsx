@@ -354,6 +354,7 @@ export default function PlanBlockAccordion({
               )}
               {/* Dynamic kick inputs - hidden for break and problem blocks */}
               {!block.isBreak && !block.isProblem && <div
+                className="kick-drag-wrapper"
                 onMouseEnter={() => setKickAreaHovered(true)}
                 onMouseLeave={() => setKickAreaHovered(false)}
               >
@@ -417,6 +418,25 @@ export default function PlanBlockAccordion({
                       onChange({ ...block, kicks: newKicks });
                     }}
                     onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => {
+                      if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const dir = e.key === 'ArrowUp' ? -1 : 1;
+                        const target = ki + dir;
+                        if (target < 0 || target >= block.kicks.length) return;
+                        const newKicks = [...block.kicks];
+                        [newKicks[ki], newKicks[target]] = [newKicks[target], newKicks[ki]];
+                        onChange({ ...block, kicks: newKicks });
+                        // Re-focus the moved input after React re-render
+                        setTimeout(() => {
+                          const inputs = (e.currentTarget as HTMLElement)
+                            .closest('.kick-drag-wrapper')
+                            ?.querySelectorAll<HTMLInputElement>('.accordion-subtitle-input');
+                          inputs?.[target]?.focus();
+                        }, 0);
+                      }
+                    }}
                     placeholder={`킥 ${ki + 1}`}
                     style={{ flex: 1 }}
                   />

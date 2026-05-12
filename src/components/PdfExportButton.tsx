@@ -123,7 +123,7 @@ export default function PdfExportButton({ reflection }: PdfExportButtonProps) {
               fontWeight: '700',
               marginBottom: '6px',
             }}>
-              {reflection.courseTitle || '(제목 없음)'}
+              {reflection.lessonGoal || reflection.courseTitle || '(제목 없음)'}
               {reflection.sessionNumber ? ` - ${reflection.sessionNumber}` : ''}
             </div>
             <div style={{

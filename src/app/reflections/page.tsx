@@ -82,7 +82,7 @@ export default function ReflectionsPage() {
               >
                 <div className="reflection-header">
                   <span className="reflection-title">
-                    {reflection.courseTitle || '(제목 없음)'}
+                    {reflection.lessonGoal || reflection.courseTitle || '(제목 없음)'}
                     {reflection.sessionNumber
                       ? ` - ${reflection.sessionNumber}`
                       : ''}
