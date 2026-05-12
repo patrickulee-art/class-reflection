@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   PlanBlock,
@@ -11,6 +11,7 @@ import {
   createProblemBlock,
 } from '@/lib/types';
 import { useReflectionsContext } from '@/contexts/ReflectionsContext';
+import { getSupabaseClient } from '@/lib/supabase';
 import { useToast } from '@/hooks/useToast';
 import BasicInfo from '@/components/BasicInfo';
 import TimeSettings from '@/components/TimeSettings';
@@ -23,6 +24,7 @@ import Toast from '@/components/Toast';
 
 const DRAFT_KEY = 'reflection_draft_v1';
 const EDIT_REFLECTION_KEY = 'edit_reflection_id';
+const SUPABASE_DRAFT_ID = -1;
 
 function getDefaultBlocks(): { blocks: PlanBlock[]; nextId: number } {
   const blocks: PlanBlock[] = [];
@@ -79,6 +81,23 @@ function WritePageContent() {
   // Draft loaded flag
   const [draftLoaded, setDraftLoaded] = useState(false);
   const [editAttempted, setEditAttempted] = useState(false);
+  const lastSupabaseSaveRef = useRef<string>('');
+
+  // Helper to apply draft data to form state
+  const applyDraft = useCallback((draft: Record<string, unknown>) => {
+    setClassDate((draft.classDate as string) || '');
+    setClassTimeStart((draft.classTimeStart as string) || '13:30');
+    setClassTimeEnd((draft.classTimeEnd as string) || '17:00');
+    setCourseTitle((draft.courseTitle as string) || '');
+    setSessionNumber((draft.sessionNumber as string) || '');
+    setLessonGoal((draft.lessonGoal as string) || '');
+    setMotivatingSpeech((draft.motivatingSpeech as string) || '');
+    setPrepTools(draft.prepTools && (draft.prepTools as string[]).length > 0 ? draft.prepTools as string[] : ['']);
+    setTotalTimeLimit((draft.totalTimeLimit as number) || 210);
+    setPlanBlocks(draft.planBlocks as PlanBlock[]);
+    setBlockIdCounter((draft.blockIdCounter as number) || 1);
+    setEditingReflectionId((draft.editingReflectionId as number | null) || null);
+  }, []);
 
   // Initialize: check for edit mode (depends on reflections being loaded)
   useEffect(() => {
@@ -88,6 +107,9 @@ function WritePageContent() {
     if (isNewMode) {
       localStorage.removeItem(DRAFT_KEY);
       localStorage.removeItem(EDIT_REFLECTION_KEY);
+      // Also clear Supabase draft
+      const client = getSupabaseClient();
+      if (client) client.from('reflections').delete().eq('id', SUPABASE_DRAFT_ID).then(() => {});
       const { blocks, nextId } = getDefaultBlocks();
       setPlanBlocks(blocks);
       setBlockIdCounter(nextId);
@@ -136,44 +158,61 @@ function WritePageContent() {
       }
     }
 
-    // Check for draft
-    const saved = localStorage.getItem(DRAFT_KEY);
-    if (saved) {
-      try {
-        const draft = JSON.parse(saved);
-        if (draft.planBlocks && draft.planBlocks.length > 0) {
-          setClassDate(draft.classDate || '');
-          setClassTimeStart(draft.classTimeStart || '13:30');
-          setClassTimeEnd(draft.classTimeEnd || '17:00');
-          setCourseTitle(draft.courseTitle || '');
-          setSessionNumber(draft.sessionNumber || '');
-          setLessonGoal(draft.lessonGoal || '');
-          setMotivatingSpeech(draft.motivatingSpeech || '');
-          setPrepTools(draft.prepTools && draft.prepTools.length > 0 ? draft.prepTools : ['']);
-          setTotalTimeLimit(draft.totalTimeLimit || 210);
-          setPlanBlocks(draft.planBlocks);
-          setBlockIdCounter(draft.blockIdCounter || 1);
-          setEditingReflectionId(draft.editingReflectionId || null);
-          setDraftLoaded(true);
-          return;
-        }
-      } catch {
-        // ignore invalid draft
+    // Check for draft: compare local and remote, use the newer one
+    const loadDraft = async () => {
+      const localSaved = localStorage.getItem(DRAFT_KEY);
+      let localDraft: Record<string, unknown> | null = null;
+      if (localSaved) {
+        try {
+          const parsed = JSON.parse(localSaved);
+          if (parsed.planBlocks && parsed.planBlocks.length > 0) {
+            localDraft = parsed;
+          }
+        } catch { /* ignore */ }
       }
-    }
 
-    // Default: new reflection
-    const { blocks, nextId } = getDefaultBlocks();
-    setPlanBlocks(blocks);
-    setBlockIdCounter(nextId);
+      // Try loading remote draft from Supabase
+      let remoteDraft: Record<string, unknown> | null = null;
+      const client = getSupabaseClient();
+      if (client) {
+        try {
+          const { data } = await client
+            .from('reflections')
+            .select('data')
+            .eq('id', SUPABASE_DRAFT_ID)
+            .single();
+          if (data?.data && (data.data as Record<string, unknown>).planBlocks) {
+            remoteDraft = data.data as Record<string, unknown>;
+          }
+        } catch { /* ignore */ }
+      }
 
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    setClassDate(`${yyyy}-${mm}-${dd}`);
-    setDraftLoaded(true);
-  }, [reflections, draftLoaded, editAttempted, isNewMode]);
+      // Pick the newer draft (compare savedAt timestamp)
+      const localTime = localDraft?.savedAt ? new Date(localDraft.savedAt as string).getTime() : 0;
+      const remoteTime = remoteDraft?.savedAt ? new Date(remoteDraft.savedAt as string).getTime() : 0;
+
+      const bestDraft = remoteTime > localTime ? remoteDraft : localDraft;
+
+      if (bestDraft && (bestDraft.planBlocks as PlanBlock[])?.length > 0) {
+        applyDraft(bestDraft);
+        setDraftLoaded(true);
+        return;
+      }
+
+      // Default: new reflection
+      const { blocks, nextId } = getDefaultBlocks();
+      setPlanBlocks(blocks);
+      setBlockIdCounter(nextId);
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      setClassDate(`${yyyy}-${mm}-${dd}`);
+      setDraftLoaded(true);
+    };
+
+    loadDraft();
+  }, [reflections, draftLoaded, editAttempted, isNewMode, applyDraft]);
 
   // Warn before browser close/refresh if there's unsaved content
   useEffect(() => {
@@ -188,7 +227,7 @@ function WritePageContent() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [draftLoaded, courseTitle, lessonGoal, motivatingSpeech, planBlocks.length]);
 
-  // Auto-save draft whenever form state changes
+  // Auto-save draft to localStorage (500ms debounce)
   useEffect(() => {
     if (!draftLoaded) return;
     const timer = setTimeout(() => {
@@ -205,10 +244,49 @@ function WritePageContent() {
         planBlocks,
         blockIdCounter,
         editingReflectionId,
+        savedAt: new Date().toISOString(),
       };
       localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
     }, 500);
     return () => clearTimeout(timer);
+  }, [draftLoaded, classDate, classTimeStart, classTimeEnd, courseTitle, sessionNumber, lessonGoal, motivatingSpeech, prepTools, totalTimeLimit, planBlocks, blockIdCounter, editingReflectionId]);
+
+  // Auto-save draft to Supabase (10s interval)
+  useEffect(() => {
+    if (!draftLoaded) return;
+    const hasContent = courseTitle || lessonGoal || motivatingSpeech || planBlocks.length > 1;
+    if (!hasContent) return;
+
+    const timer = setInterval(() => {
+      const draft = {
+        classDate,
+        classTimeStart,
+        classTimeEnd,
+        courseTitle,
+        sessionNumber,
+        lessonGoal,
+        motivatingSpeech,
+        prepTools,
+        totalTimeLimit,
+        planBlocks,
+        blockIdCounter,
+        editingReflectionId,
+        savedAt: new Date().toISOString(),
+      };
+      const json = JSON.stringify(draft);
+      // Skip if nothing changed since last Supabase save
+      if (json === lastSupabaseSaveRef.current) return;
+
+      const client = getSupabaseClient();
+      if (!client) return;
+      client.from('reflections').upsert({ id: SUPABASE_DRAFT_ID, data: draft }).then(({ error }) => {
+        if (!error) {
+          lastSupabaseSaveRef.current = json;
+        }
+      });
+    }, 10000);
+
+    return () => clearInterval(timer);
   }, [draftLoaded, classDate, classTimeStart, classTimeEnd, courseTitle, sessionNumber, lessonGoal, motivatingSpeech, prepTools, totalTimeLimit, planBlocks, blockIdCounter, editingReflectionId]);
 
   // Plan block operations
@@ -369,6 +447,10 @@ function WritePageContent() {
 
     addReflection(reflection);
     localStorage.removeItem(DRAFT_KEY);
+    // Clear Supabase draft
+    const client = getSupabaseClient();
+    if (client) client.from('reflections').delete().eq('id', SUPABASE_DRAFT_ID).then(() => {});
+    lastSupabaseSaveRef.current = '';
     showToast('success', '설계가 저장되었습니다!');
 
     // Navigate to reflections list after short delay for toast visibility

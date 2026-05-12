@@ -80,6 +80,10 @@ export default function PlanBlockAccordion({
   const [evalDropdownOpen, setEvalDropdownOpen] = useState(false);
   const [customEvalInput, setCustomEvalInput] = useState('');
   const [lastRemovedKick, setLastRemovedKick] = useState<string | null>(null);
+  const [kickDragIndex, setKickDragIndex] = useState<number | null>(null);
+  const [kickDragOverIndex, setKickDragOverIndex] = useState<number | null>(null);
+  const [kickDragOverPos, setKickDragOverPos] = useState<'top' | 'bottom' | null>(null);
+  const [kickAreaHovered, setKickAreaHovered] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const cognitiveClass = `cognitive-${block.cognitiveLevel}`;
@@ -202,10 +206,11 @@ export default function PlanBlockAccordion({
   return (
     <div
       className={`accordion-block ${isOpen ? 'open' : ''} ${dragClasses}`}
-      draggable
+      draggable={!kickAreaHovered}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onDragStart={(e) => {
+        if (kickAreaHovered) { e.preventDefault(); return; }
         e.dataTransfer.effectAllowed = 'move';
         onDragStart(index);
       }}
@@ -348,21 +353,76 @@ export default function PlanBlockAccordion({
                 </div>
               )}
               {/* Dynamic kick inputs - hidden for break and problem blocks */}
-              {!block.isBreak && !block.isProblem && block.kicks.map((kick, ki) => (
-                <input
+              {!block.isBreak && !block.isProblem && <div
+                onMouseEnter={() => setKickAreaHovered(true)}
+                onMouseLeave={() => setKickAreaHovered(false)}
+              >
+              {block.kicks.map((kick, ki) => (
+                <div
                   key={ki}
-                  type="text"
-                  className="accordion-subtitle-input"
-                  value={kick}
-                  onChange={(e) => {
-                    const newKicks = [...block.kicks];
-                    newKicks[ki] = e.target.value;
-                    onChange({ ...block, kicks: newKicks });
+                  className={`kick-drag-item${kickDragIndex === ki ? ' kick-dragging' : ''}${kickDragOverIndex === ki && kickDragIndex !== ki ? (kickDragOverPos === 'top' ? ' kick-drag-over' : ' kick-drag-over-bottom') : ''}`}
+                  onDragOver={(e) => {
+                    if (kickDragIndex === null) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                    const pos = e.clientY < rect.top + rect.height / 2 ? 'top' : 'bottom';
+                    setKickDragOverIndex(ki);
+                    setKickDragOverPos(pos);
                   }}
-                  onClick={(e) => e.stopPropagation()}
-                  placeholder={`킥 ${ki + 1}`}
-                />
+                  onDragLeave={() => { setKickDragOverIndex(null); setKickDragOverPos(null); }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (kickDragIndex !== null && kickDragIndex !== ki) {
+                      const newKicks = [...block.kicks];
+                      const [moved] = newKicks.splice(kickDragIndex, 1);
+                      let insertAt = kickDragOverPos === 'bottom'
+                        ? (kickDragIndex < ki ? ki : ki + 1)
+                        : (kickDragIndex < ki ? ki - 1 : ki);
+                      insertAt = Math.max(0, Math.min(insertAt, newKicks.length));
+                      newKicks.splice(insertAt, 0, moved);
+                      onChange({ ...block, kicks: newKicks });
+                    }
+                    setKickDragIndex(null);
+                    setKickDragOverIndex(null);
+                    setKickDragOverPos(null);
+                  }}
+                >
+                  <span
+                    className="kick-drag-handle"
+                    draggable
+                    onClick={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onDragStart={(e) => {
+                      e.stopPropagation();
+                      setKickDragIndex(ki);
+                      e.dataTransfer.effectAllowed = 'move';
+                      e.dataTransfer.setData('text/plain', String(ki));
+                    }}
+                    onDragEnd={(e) => {
+                      e.stopPropagation();
+                      setKickDragIndex(null);
+                      setKickDragOverIndex(null);
+                      setKickDragOverPos(null);
+                    }}
+                  >⠿</span>
+                  <input
+                    type="text"
+                    className="accordion-subtitle-input"
+                    value={kick}
+                    onChange={(e) => {
+                      const newKicks = [...block.kicks];
+                      newKicks[ki] = e.target.value;
+                      onChange({ ...block, kicks: newKicks });
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    placeholder={`킥 ${ki + 1}`}
+                    style={{ flex: 1 }}
+                  />
+                </div>
               ))}
+              </div>}
             </div>
             {/* Kick +/- buttons outside input column - hidden for break and problem blocks */}
             {!block.isBreak && !block.isProblem && (

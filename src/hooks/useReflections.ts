@@ -49,7 +49,7 @@ export function useReflections() {
 
       const allRemote: Reflection[] = (remoteData || [])
         .map((row: { data: Reflection }) => row.data)
-        .filter((r: Reflection | null) => r != null);
+        .filter((r: Reflection | null) => r != null && r.id !== -1);
 
       // Filter out locally-deleted IDs from remote data
       const deletedIds = new Set(getDeletedIds());

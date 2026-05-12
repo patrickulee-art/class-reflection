@@ -24,6 +24,7 @@ function formatReflectionDate(dateStr: string): string {
 }
 
 function getReflectionLabel(r: Reflection): string {
+  if (r.lessonGoal) return r.lessonGoal;
   if (r.courseTitle) {
     const session = r.sessionNumber ? ` ${r.sessionNumber}` : '';
     return `${r.courseTitle}${session}`;

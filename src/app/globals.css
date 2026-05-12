@@ -924,6 +924,62 @@ select:focus {
     font-size: 13px;
 }
 
+/* ===== Kick Drag and Drop ===== */
+
+.kick-drag-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+    transition: opacity 0.15s;
+}
+
+.kick-drag-item.kick-dragging {
+    opacity: 0.4;
+}
+
+.kick-drag-item.kick-drag-over::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #6366F1;
+    border-radius: 1px;
+}
+
+.kick-drag-item.kick-drag-over-bottom::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #6366F1;
+    border-radius: 1px;
+}
+
+.kick-drag-handle {
+    cursor: grab;
+    color: #D1D5DB;
+    font-size: 12px;
+    user-select: none;
+    padding: 2px;
+    border-radius: 4px;
+    transition: color 0.15s;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.kick-drag-handle:hover {
+    color: #6B7280;
+}
+
+.kick-drag-handle:active {
+    cursor: grabbing;
+}
+
 .accordion-time {
     font-size: 16px;
     opacity: 0.9;
