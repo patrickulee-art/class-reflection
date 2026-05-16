@@ -134,9 +134,21 @@ export default function Sidebar({ isOpen, onClose, onToggle }: SidebarProps) {
           </Link>
 
           <Link
+            href="/warmup"
+            className={`sidebar-menu-item ${pathname === '/warmup' ? 'active' : ''}`}
+          >
+            <span className="sidebar-menu-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+            </span>
+            <span>수업 준비운동</span>
+          </Link>
+
+          <Link
             href="/reflections"
             className={`sidebar-menu-item ${pathname === '/reflections' ? 'active' : ''}`}
-
           >
             <span className="sidebar-menu-icon">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -207,9 +219,9 @@ export default function Sidebar({ isOpen, onClose, onToggle }: SidebarProps) {
                 {searchQuery ? '검색 결과가 없습니다' : '저장된 설계가 없습니다'}
               </div>
             ) : (
-              filteredReflections.map((r) => (
+              filteredReflections.map((r, idx) => (
                 <button
-                  key={r.id}
+                  key={`${r.id}-${idx}`}
                   className="sidebar-recent-item"
                   onClick={() => handleRecentClick(r)}
                 >

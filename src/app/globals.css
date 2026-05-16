@@ -2605,6 +2605,193 @@ select:focus {
     line-height: 1.4;
 }
 
+/* ===== Warmup Page ===== */
+
+.warmup-page {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.warmup-page .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.warmup-progress {
+    font-size: 14px;
+    font-weight: 600;
+    color: #6366F1;
+    background: #EEF2FF;
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.warmup-section {
+    margin-bottom: 24px;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #E5E7EB;
+}
+
+.warmup-section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1A1A1A;
+    margin: 0 0 4px;
+}
+
+.warmup-section-desc {
+    font-size: 13px;
+    color: #9CA3AF;
+    margin: 0 0 14px;
+    font-style: italic;
+}
+
+.warmup-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.warmup-check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: #F9FAFB;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.warmup-check-item:hover {
+    background: #F3F4F6;
+}
+
+.warmup-check-item.checked {
+    background: #F0FDF4;
+}
+
+.warmup-check-item.checked .warmup-check-text {
+    color: #9CA3AF;
+    text-decoration: line-through;
+}
+
+.warmup-check-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    accent-color: #22C55E;
+    cursor: pointer;
+}
+
+.warmup-check-text {
+    font-size: 14px;
+    color: #374151;
+    line-height: 1.5;
+    white-space: pre-line;
+}
+
+.warmup-custom-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.warmup-custom-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    color: #374151;
+    outline: none;
+    font-family: inherit;
+    padding: 0;
+}
+
+.warmup-custom-input::placeholder {
+    color: #D1D5DB;
+}
+
+.warmup-remove-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid #E5E7EB;
+    background: white;
+    color: #9CA3AF;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+}
+
+.warmup-remove-btn:hover {
+    background: #FEE2E2;
+    color: #EF4444;
+    border-color: #FECACA;
+}
+
+.warmup-add-btn {
+    margin-top: 10px;
+    width: 100%;
+    padding: 10px;
+    border: 2px dashed #D1D5DB;
+    border-radius: 8px;
+    background: transparent;
+    color: #9CA3AF;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.warmup-add-btn:hover {
+    border-color: #6366F1;
+    color: #6366F1;
+}
+
+.warmup-tip {
+    text-align: center;
+    padding: 20px;
+    margin: 24px 0 16px;
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    border-radius: 12px;
+    font-size: 14px;
+    color: #92400E;
+    line-height: 1.7;
+}
+
+.warmup-reset-btn {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    background: white;
+    color: #9CA3AF;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+    margin-bottom: 40px;
+}
+
+.warmup-reset-btn:hover {
+    background: #F3F4F6;
+    color: #374151;
+}
+
 /* ===== Hamburger Button (mobile) ===== */
 
 .hamburger-btn {
