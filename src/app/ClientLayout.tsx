@@ -1,8 +1,59 @@
 'use client';
 
-import { ReactNode, useState, useCallback, useEffect } from 'react';
+import { ReactNode, useState, useCallback, useEffect, Component, ErrorInfo } from 'react';
 import { ReflectionsProvider } from '@/contexts/ReflectionsContext';
 import Sidebar from '@/components/Sidebar';
+
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('App error:', error, info);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '40px', textAlign: 'center', fontFamily: 'system-ui' }}>
+          <h2>문제가 발생했습니다</h2>
+          <p style={{ color: '#6B7280', marginBottom: '20px' }}>
+            앱을 다시 로드해주세요. 문제가 계속되면 브라우저 캐시를 삭제해보세요.
+          </p>
+          <button
+            onClick={() => {
+              this.setState({ hasError: false });
+              window.location.reload();
+            }}
+            style={{
+              padding: '10px 24px', background: '#6366F1', color: 'white',
+              border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px',
+            }}
+          >
+            새로고침
+          </button>
+          <button
+            onClick={() => {
+              localStorage.clear();
+              window.location.reload();
+            }}
+            style={{
+              padding: '10px 24px', background: '#EF4444', color: 'white',
+              border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px',
+              marginLeft: '10px',
+            }}
+          >
+            캐시 삭제 후 새로고침
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const SIDEBAR_STATE_KEY = 'sidebar_open_v1';
 
@@ -36,6 +87,7 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
   }, []);
 
   return (
+    <ErrorBoundary>
     <ReflectionsProvider>
       <div className={`main-layout ${sidebarOpen ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
         <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} onToggle={toggleSidebar} />
@@ -57,5 +109,6 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
         </div>
       </div>
     </ReflectionsProvider>
+    </ErrorBoundary>
   );
 }

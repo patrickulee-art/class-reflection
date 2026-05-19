@@ -148,9 +148,14 @@ export function useReflections() {
   }, []);
 
   useEffect(() => {
-    const local = loadReflections();
-    setReflections(local);
-    syncWithSupabase();
+    try {
+      const local = loadReflections();
+      setReflections(local);
+    } catch (e) {
+      console.error('Failed to load local reflections:', e);
+      setReflections([]);
+    }
+    syncWithSupabase().catch((e) => console.error('Initial sync failed:', e));
   }, [syncWithSupabase]);
 
   const addReflection = useCallback(async (reflection: Reflection) => {
