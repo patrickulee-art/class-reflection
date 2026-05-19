@@ -87,8 +87,8 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <ErrorBoundary>
     <ReflectionsProvider>
+    <ErrorBoundary>
       <div className={`main-layout ${sidebarOpen ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
         <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} onToggle={toggleSidebar} />
         {!sidebarOpen && (
@@ -108,7 +108,7 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
           {children}
         </div>
       </div>
-    </ReflectionsProvider>
     </ErrorBoundary>
+    </ReflectionsProvider>
   );
 }
