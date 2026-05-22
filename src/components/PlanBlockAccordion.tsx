@@ -422,17 +422,17 @@ export default function PlanBlockAccordion({
                       if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
                         e.preventDefault();
                         e.stopPropagation();
-                        const dir = e.key === 'ArrowUp' ? -1 : 1;
-                        const target = ki + dir;
+                        const target = e.key === 'ArrowUp' ? ki - 1 : ki + 1;
                         if (target < 0 || target >= block.kicks.length) return;
                         const newKicks = [...block.kicks];
-                        [newKicks[ki], newKicks[target]] = [newKicks[target], newKicks[ki]];
+                        const [moved] = newKicks.splice(ki, 1);
+                        newKicks.splice(target, 0, moved);
                         onChange({ ...block, kicks: newKicks });
-                        // Re-focus the moved input after React re-render
                         setTimeout(() => {
-                          const inputs = (e.currentTarget as HTMLElement)
-                            .closest('.kick-drag-wrapper')
-                            ?.querySelectorAll<HTMLInputElement>('.accordion-subtitle-input');
+                          const wrapper = document.querySelector(
+                            `.accordion-block:nth-child(${index + 1}) .kick-drag-wrapper`
+                          );
+                          const inputs = wrapper?.querySelectorAll<HTMLInputElement>('.accordion-subtitle-input');
                           inputs?.[target]?.focus();
                         }, 0);
                       }
