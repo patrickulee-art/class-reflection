@@ -60,8 +60,8 @@ export default function Sidebar({ isOpen, onClose, onToggle }: SidebarProps) {
 
   const sortedReflections = useMemo(() => {
     return [...reflections].sort((a, b) => {
-      const dateA = a.date || a.createdAt;
-      const dateB = b.date || b.createdAt;
+      const dateA = a.date || a.createdAt || '';
+      const dateB = b.date || b.createdAt || '';
       return dateB.localeCompare(dateA);
     });
   }, [reflections]);
